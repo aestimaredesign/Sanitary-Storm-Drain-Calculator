@@ -276,6 +276,31 @@
       border-radius: 4px;
       margin-top: 15px;
     }
+    
+    .productivity-info {
+      background: #e8f4fd;
+      padding: 15px;
+      border-radius: 4px;
+      margin-top: 15px;
+      border-left: 4px solid var(--primary);
+    }
+    
+    .productivity-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 10px;
+      font-size: 0.9em;
+    }
+    
+    .productivity-table th, .productivity-table td {
+      padding: 8px;
+      text-align: left;
+      border-bottom: 1px solid #ddd;
+    }
+    
+    .productivity-table th {
+      background-color: #f1f5f9;
+    }
   </style>
 </head>
 <body>
@@ -581,20 +606,41 @@
         <div class="labor-inputs">
           <h3>Labor Requirements</h3>
           <div class="form-row">
-            <label for="laborRate">Labor Rate (per hour):</label>
-            <input type="number" id="laborRate" value="50" min="0" step="0.1">
+            <label for="productivityStandard">Productivity Standard:</label>
+            <select id="productivityStandard">
+              <option value="philippines">Philippines (Manual/Low-tech)</option>
+              <option value="international">International (Mechanized/High-tech)</option>
+              <option value="custom">Custom Productivity Rates</option>
+            </select>
+          </div>
+          
+          <div id="customProductivityRates" style="display: none;">
+            <h4>Custom Productivity Rates</h4>
+            <div class="form-row">
+              <label for="customPipeLaying">Pipe Laying (m/day):</label>
+              <input type="number" id="customPipeLaying" value="10" min="1" step="0.1">
+            </div>
+            <div class="form-row">
+              <label for="customManhole">Manhole Construction (units/day):</label>
+              <input type="number" id="customManhole" value="0.8" min="0.1" step="0.1">
+            </div>
+            <div class="form-row">
+              <label for="customCatchBasin">Catch Basin (units/day):</label>
+              <input type="number" id="customCatchBasin" value="1.2" min="0.1" step="0.1">
+            </div>
+            <div class="form-row">
+              <label for="customFitting">Fittings Installation (units/day):</label>
+              <input type="number" id="customFitting" value="20" min="1" step="1">
+            </div>
+          </div>
+          
+          <div class="form-row">
+            <label for="plumberRate">Plumber Rate (per hour):</label>
+            <input type="number" id="plumberRate" value="80" min="0" step="0.1">
           </div>
           <div class="form-row">
-            <label for="plumbers">Number of Plumbers:</label>
-            <input type="number" id="plumbers" value="2" min="1">
-          </div>
-          <div class="form-row">
-            <label for="helpers">Number of Helpers:</label>
-            <input type="number" id="helpers" value="2" min="0">
-          </div>
-          <div class="form-row">
-            <label for="workDays">Estimated Work Days:</label>
-            <input type="number" id="workDays" value="5" min="1">
+            <label for="helperRate">Helper Rate (per hour):</label>
+            <input type="number" id="helperRate" value="50" min="0" step="0.1">
           </div>
           <div class="form-row">
             <label for="dailyHours">Daily Work Hours:</label>
@@ -612,6 +658,47 @@
             <label for="profitMargin">Profit Margin (%):</label>
             <input type="number" id="profitMargin" value="10" min="0" max="30">
           </div>
+        </div>
+        
+        <div class="productivity-info">
+          <h3>Productivity Reference</h3>
+          <table class="productivity-table">
+            <thead>
+              <tr>
+                <th>Work Item</th>
+                <th>Philippines</th>
+                <th>International</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>PVC/HDPE Pipe Laying (m/day)</td>
+                <td>10-15 m</td>
+                <td>20-30 m</td>
+              </tr>
+              <tr>
+                <td>Concrete Pipe Laying (m/day)</td>
+                <td>4-6 m</td>
+                <td>8-12 m</td>
+              </tr>
+              <tr>
+                <td>Manhole Construction (units/day)</td>
+                <td>0.6-1.0</td>
+                <td>1-2</td>
+              </tr>
+              <tr>
+                <td>Catch Basin (units/day)</td>
+                <td>1-1.5</td>
+                <td>2-3</td>
+              </tr>
+              <tr>
+                <td>Fittings Installation (units/day)</td>
+                <td>15-25</td>
+                <td>30-50</td>
+              </tr>
+            </tbody>
+          </table>
+          <p><small>Note: Productivity rates are per crew, not per individual worker. Philippine rates reflect manual labor while international rates assume mechanized equipment.</small></p>
         </div>
         
         <button onclick="calculateCosts()">Calculate Total Costs</button>
@@ -643,7 +730,7 @@
               <th>Quantity</th>
               <th>Unit Cost</th>
               <th>Material Cost</th>
-              <th>Labor Hours</th>
+              <th>Labor Days</th>
               <th>Labor Cost</th>
               <th>Total Cost</th>
             </tr>
@@ -682,16 +769,38 @@
       }
     };
     
-    // Labor estimates (hours per unit)
-    const laborEstimates = {
-      pipe: { pvc: 0.5, castIron: 1.2, hdp: 0.6, abs: 0.5, corrugated: 0.4, concrete: 1.5 },
-      fitting: { pvc: 0.25, castIron: 0.5, hdp: 0.3, abs: 0.25, corrugated: 0.2, concrete: 0.8 },
-      trap: 0.75,
-      vent: 1.0,
-      cleanout: 0.5,
-      manhole: 4.0,
-      downspout: 1.5,
-      catchBasin: 3.0
+    // Productivity rates (per crew per day)
+    const productivityRates = {
+      philippines: {
+        pvcPipe: 12,        // meters per day
+        hdpPipe: 12,        // meters per day
+        absPipe: 12,        // meters per day
+        castIronPipe: 8,    // meters per day
+        concretePipe: 5,    // meters per day
+        corrugatedPipe: 10, // meters per day
+        manhole: 0.8,       // units per day
+        catchBasin: 1.2,    // units per day
+        fitting: 20,        // units per day
+        trap: 25,           // units per day
+        vent: 25,           // units per day
+        cleanout: 15,       // units per day
+        downspout: 8        // units per day
+      },
+      international: {
+        pvcPipe: 25,        // meters per day
+        hdpPipe: 25,        // meters per day
+        absPipe: 25,        // meters per day
+        castIronPipe: 15,   // meters per day
+        concretePipe: 10,   // meters per day
+        corrugatedPipe: 20, // meters per day
+        manhole: 1.5,       // units per day
+        catchBasin: 2.5,    // units per day
+        fitting: 40,        // units per day
+        trap: 50,           // units per day
+        vent: 50,           // units per day
+        cleanout: 30,       // units per day
+        downspout: 15       // units per day
+      }
     };
 
     // Initialize the calculator
@@ -699,6 +808,16 @@
       // Initialize units
       document.getElementById('units').addEventListener('change', updateUnits);
       updateUnits();
+      
+      // Productivity standard change handler
+      document.getElementById('productivityStandard').addEventListener('change', function() {
+        const customRatesDiv = document.getElementById('customProductivityRates');
+        if (this.value === 'custom') {
+          customRatesDiv.style.display = 'block';
+        } else {
+          customRatesDiv.style.display = 'none';
+        }
+      });
     });
     
     // Tab switching function
@@ -975,12 +1094,11 @@
       `;
     }
     
-    // Calculate costs
+    // Calculate costs with productivity-based labor
     function calculateCosts() {
-      const laborRate = parseFloat(document.getElementById('laborRate').value);
-      const plumbers = parseInt(document.getElementById('plumbers').value);
-      const helpers = parseInt(document.getElementById('helpers').value);
-      const workDays = parseInt(document.getElementById('workDays').value);
+      const productivityStandard = document.getElementById('productivityStandard').value;
+      const plumberRate = parseFloat(document.getElementById('plumberRate').value);
+      const helperRate = parseFloat(document.getElementById('helperRate').value);
       const dailyHours = parseInt(document.getElementById('dailyHours').value);
       const wasteFactor = parseFloat(document.getElementById('wasteFactor').value) / 100;
       const overhead = parseFloat(document.getElementById('overhead').value) / 100;
@@ -994,8 +1112,30 @@
       }
       
       let totalMaterialCost = 0;
-      let totalLaborHours = 0;
+      let totalLaborDays = 0;
       let totalLaborCost = 0;
+      
+      // Get productivity rates
+      let productivity = {};
+      if (productivityStandard === 'custom') {
+        productivity = {
+          pvcPipe: parseFloat(document.getElementById('customPipeLaying').value),
+          hdpPipe: parseFloat(document.getElementById('customPipeLaying').value),
+          absPipe: parseFloat(document.getElementById('customPipeLaying').value),
+          castIronPipe: parseFloat(document.getElementById('customPipeLaying').value) * 0.7,
+          concretePipe: parseFloat(document.getElementById('customPipeLaying').value) * 0.5,
+          corrugatedPipe: parseFloat(document.getElementById('customPipeLaying').value) * 0.8,
+          manhole: parseFloat(document.getElementById('customManhole').value),
+          catchBasin: parseFloat(document.getElementById('customCatchBasin').value),
+          fitting: parseFloat(document.getElementById('customFitting').value),
+          trap: parseFloat(document.getElementById('customFitting').value) * 1.2,
+          vent: parseFloat(document.getElementById('customFitting').value) * 1.2,
+          cleanout: parseFloat(document.getElementById('customFitting').value) * 0.8,
+          downspout: parseFloat(document.getElementById('customFitting').value) * 0.4
+        };
+      } else {
+        productivity = productivityRates[productivityStandard];
+      }
       
       // Add sanitary system costs if calculated
       if (window.sanitaryResults) {
@@ -1012,62 +1152,63 @@
         
         // Pipe cost
         const pipeMaterialCost = pipeCost * r.pipeQty;
-        const pipeLaborHours = laborEstimates.pipe[material] * r.pipeQty;
-        const pipeLaborCost = pipeLaborHours * laborRate;
+        const pipeProductivity = productivity[material.toLowerCase() + 'Pipe'] || productivity.pvcPipe;
+        const pipeLaborDays = r.runLength / pipeProductivity;
+        const pipeLaborCost = pipeLaborDays * (plumberRate + helperRate * 2) * dailyHours;
         
-        addCostRow('Sanitary Pipe', r.pipeQty, formatCurrency(pipeCost), formatCurrency(pipeMaterialCost), pipeLaborHours.toFixed(1), formatCurrency(pipeLaborCost));
+        addCostRow('Sanitary Pipe', r.pipeQty, formatCurrency(pipeCost), formatCurrency(pipeMaterialCost), pipeLaborDays.toFixed(1), formatCurrency(pipeLaborCost));
         totalMaterialCost += pipeMaterialCost;
-        totalLaborHours += pipeLaborHours;
+        totalLaborDays += pipeLaborDays;
         totalLaborCost += pipeLaborCost;
         
         // Fittings cost
         const fittingMaterialCost = fittingCost * r.fittings;
-        const fittingLaborHours = laborEstimates.fitting[material] * r.fittings;
-        const fittingLaborCost = fittingLaborHours * laborRate;
+        const fittingLaborDays = r.fittings / productivity.fitting;
+        const fittingLaborCost = fittingLaborDays * (plumberRate + helperRate) * dailyHours;
         
-        addCostRow('Sanitary Fittings', r.fittings, formatCurrency(fittingCost), formatCurrency(fittingMaterialCost), fittingLaborHours.toFixed(1), formatCurrency(fittingLaborCost));
+        addCostRow('Sanitary Fittings', r.fittings, formatCurrency(fittingCost), formatCurrency(fittingMaterialCost), fittingLaborDays.toFixed(1), formatCurrency(fittingLaborCost));
         totalMaterialCost += fittingMaterialCost;
-        totalLaborHours += fittingLaborHours;
+        totalLaborDays += fittingLaborDays;
         totalLaborCost += fittingLaborCost;
         
         // Traps cost
         const trapMaterialCost = trapCost * r.traps;
-        const trapLaborHours = laborEstimates.trap * r.traps;
-        const trapLaborCost = trapLaborHours * laborRate;
+        const trapLaborDays = r.traps / productivity.trap;
+        const trapLaborCost = trapLaborDays * (plumberRate + helperRate) * dailyHours;
         
-        addCostRow('Traps', r.traps, formatCurrency(trapCost), formatCurrency(trapMaterialCost), trapLaborHours.toFixed(1), formatCurrency(trapLaborCost));
+        addCostRow('Traps', r.traps, formatCurrency(trapCost), formatCurrency(trapMaterialCost), trapLaborDays.toFixed(1), formatCurrency(trapLaborCost));
         totalMaterialCost += trapMaterialCost;
-        totalLaborHours += trapLaborHours;
+        totalLaborDays += trapLaborDays;
         totalLaborCost += trapLaborCost;
         
         // Vents cost
         const ventMaterialCost = ventCost * r.vents;
-        const ventLaborHours = laborEstimates.vent * r.vents;
-        const ventLaborCost = ventLaborHours * laborRate;
+        const ventLaborDays = r.vents / productivity.vent;
+        const ventLaborCost = ventLaborDays * (plumberRate + helperRate) * dailyHours;
         
-        addCostRow('Vents', r.vents, formatCurrency(ventCost), formatCurrency(ventMaterialCost), ventLaborHours.toFixed(1), formatCurrency(ventLaborCost));
+        addCostRow('Vents', r.vents, formatCurrency(ventCost), formatCurrency(ventMaterialCost), ventLaborDays.toFixed(1), formatCurrency(ventLaborCost));
         totalMaterialCost += ventMaterialCost;
-        totalLaborHours += ventLaborHours;
+        totalLaborDays += ventLaborDays;
         totalLaborCost += ventLaborCost;
         
         // Cleanouts cost
         const cleanoutMaterialCost = cleanoutCost * r.cleanouts;
-        const cleanoutLaborHours = laborEstimates.cleanout * r.cleanouts;
-        const cleanoutLaborCost = cleanoutLaborHours * laborRate;
+        const cleanoutLaborDays = r.cleanouts / productivity.cleanout;
+        const cleanoutLaborCost = cleanoutLaborDays * (plumberRate + helperRate) * dailyHours;
         
-        addCostRow('Cleanouts', r.cleanouts, formatCurrency(cleanoutCost), formatCurrency(cleanoutMaterialCost), cleanoutLaborHours.toFixed(1), formatCurrency(cleanoutLaborCost));
+        addCostRow('Cleanouts', r.cleanouts, formatCurrency(cleanoutCost), formatCurrency(cleanoutMaterialCost), cleanoutLaborDays.toFixed(1), formatCurrency(cleanoutLaborCost));
         totalMaterialCost += cleanoutMaterialCost;
-        totalLaborHours += cleanoutLaborHours;
+        totalLaborDays += cleanoutLaborDays;
         totalLaborCost += cleanoutLaborCost;
         
         // Manholes cost
         const manholeMaterialCost = manholeCost * r.manholes;
-        const manholeLaborHours = laborEstimates.manhole * r.manholes;
-        const manholeLaborCost = manholeLaborHours * laborRate;
+        const manholeLaborDays = r.manholes / productivity.manhole;
+        const manholeLaborCost = manholeLaborDays * (plumberRate + helperRate * 2) * dailyHours;
         
-        addCostRow('Manholes', r.manholes, formatCurrency(manholeCost), formatCurrency(manholeMaterialCost), manholeLaborHours.toFixed(1), formatCurrency(manholeLaborCost));
+        addCostRow('Manholes', r.manholes, formatCurrency(manholeCost), formatCurrency(manholeMaterialCost), manholeLaborDays.toFixed(1), formatCurrency(manholeLaborCost));
         totalMaterialCost += manholeMaterialCost;
-        totalLaborHours += manholeLaborHours;
+        totalLaborDays += manholeLaborDays;
         totalLaborCost += manholeLaborCost;
       }
       
@@ -1085,62 +1226,55 @@
         
         // Pipe cost
         const pipeMaterialCost = pipeCost * r.pipeQty;
-        const pipeLaborHours = laborEstimates.pipe[material] * r.pipeQty;
-        const pipeLaborCost = pipeLaborHours * laborRate;
+        const pipeProductivity = productivity[material.toLowerCase() + 'Pipe'] || productivity.pvcPipe;
+        const pipeLaborDays = r.runLength / pipeProductivity;
+        const pipeLaborCost = pipeLaborDays * (plumberRate + helperRate * 2) * dailyHours;
         
-        addCostRow('Storm Pipe', r.pipeQty, formatCurrency(pipeCost), formatCurrency(pipeMaterialCost), pipeLaborHours.toFixed(1), formatCurrency(pipeLaborCost));
+        addCostRow('Storm Pipe', r.pipeQty, formatCurrency(pipeCost), formatCurrency(pipeMaterialCost), pipeLaborDays.toFixed(1), formatCurrency(pipeLaborCost));
         totalMaterialCost += pipeMaterialCost;
-        totalLaborHours += pipeLaborHours;
+        totalLaborDays += pipeLaborDays;
         totalLaborCost += pipeLaborCost;
         
         // Fittings cost
         const fittingMaterialCost = fittingCost * r.fittings;
-        const fittingLaborHours = laborEstimates.fitting[material] * r.fittings;
-        const fittingLaborCost = fittingLaborHours * laborRate;
+        const fittingLaborDays = r.fittings / productivity.fitting;
+        const fittingLaborCost = fittingLaborDays * (plumberRate + helperRate) * dailyHours;
         
-        addCostRow('Storm Fittings', r.fittings, formatCurrency(fittingCost), formatCurrency(fittingMaterialCost), fittingLaborHours.toFixed(1), formatCurrency(fittingLaborCost));
+        addCostRow('Storm Fittings', r.fittings, formatCurrency(fittingCost), formatCurrency(fittingMaterialCost), fittingLaborDays.toFixed(1), formatCurrency(fittingLaborCost));
         totalMaterialCost += fittingMaterialCost;
-        totalLaborHours += fittingLaborHours;
+        totalLaborDays += fittingLaborDays;
         totalLaborCost += fittingLaborCost;
         
         // Downspouts cost
         const downspoutMaterialCost = downspoutCost * r.downspouts;
-        const downspoutLaborHours = laborEstimates.downspout * r.downspouts;
-        const downspoutLaborCost = downspoutLaborHours * laborRate;
+        const downspoutLaborDays = r.downspouts / productivity.downspout;
+        const downspoutLaborCost = downspoutLaborDays * (plumberRate + helperRate) * dailyHours;
         
-        addCostRow('Downspouts', r.downspouts, formatCurrency(downspoutCost), formatCurrency(downspoutMaterialCost), downspoutLaborHours.toFixed(1), formatCurrency(downspoutLaborCost));
+        addCostRow('Downspouts', r.downspouts, formatCurrency(downspoutCost), formatCurrency(downspoutMaterialCost), downspoutLaborDays.toFixed(1), formatCurrency(downspoutLaborCost));
         totalMaterialCost += downspoutMaterialCost;
-        totalLaborHours += downspoutLaborHours;
+        totalLaborDays += downspoutLaborDays;
         totalLaborCost += downspoutLaborCost;
         
         // Catch basins cost
         const catchBasinMaterialCost = catchBasinCost * r.catchBasins;
-        const catchBasinLaborHours = laborEstimates.catchBasin * r.catchBasins;
-        const catchBasinLaborCost = catchBasinLaborHours * laborRate;
+        const catchBasinLaborDays = r.catchBasins / productivity.catchBasin;
+        const catchBasinLaborCost = catchBasinLaborDays * (plumberRate + helperRate * 2) * dailyHours;
         
-        addCostRow('Catch Basins', r.catchBasins, formatCurrency(catchBasinCost), formatCurrency(catchBasinMaterialCost), catchBasinLaborHours.toFixed(1), formatCurrency(catchBasinLaborCost));
+        addCostRow('Catch Basins', r.catchBasins, formatCurrency(catchBasinCost), formatCurrency(catchBasinMaterialCost), catchBasinLaborDays.toFixed(1), formatCurrency(catchBasinLaborCost));
         totalMaterialCost += catchBasinMaterialCost;
-        totalLaborHours += catchBasinLaborHours;
+        totalLaborDays += catchBasinLaborDays;
         totalLaborCost += catchBasinLaborCost;
         
         // Manholes cost
         const manholeMaterialCost = manholeCost * r.manholes;
-        const manholeLaborHours = laborEstimates.manhole * r.manholes;
-        const manholeLaborCost = manholeLaborHours * laborRate;
+        const manholeLaborDays = r.manholes / productivity.manhole;
+        const manholeLaborCost = manholeLaborDays * (plumberRate + helperRate * 2) * dailyHours;
         
-        addCostRow('Storm Manholes', r.manholes, formatCurrency(manholeCost), formatCurrency(manholeMaterialCost), manholeLaborHours.toFixed(1), formatCurrency(manholeLaborCost));
+        addCostRow('Storm Manholes', r.manholes, formatCurrency(manholeCost), formatCurrency(manholeMaterialCost), manholeLaborDays.toFixed(1), formatCurrency(manholeLaborCost));
         totalMaterialCost += manholeMaterialCost;
-        totalLaborHours += manholeLaborHours;
+        totalLaborDays += manholeLaborDays;
         totalLaborCost += manholeLaborCost;
       }
-      
-      // Calculate additional labor costs (crew-based)
-      const totalCrewHours = (plumbers + helpers) * workDays * dailyHours;
-      const crewLaborCost = totalCrewHours * laborRate;
-      
-      addCostRow('Crew Labor (Plumbers & Helpers)', '', '', '', totalCrewHours.toFixed(1), formatCurrency(crewLaborCost));
-      totalLaborHours += totalCrewHours;
-      totalLaborCost += crewLaborCost;
       
       // Apply waste factor to materials
       const wasteAmount = totalMaterialCost * wasteFactor;
@@ -1157,7 +1291,7 @@
       addCostRow('Materials Subtotal', '', '', formatCurrency(totalMaterialCost), '', '');
       addCostRow(`Waste (${(wasteFactor*100).toFixed(0)}%)`, '', '', formatCurrency(wasteAmount), '', '');
       addCostRow('Materials Total', '', '', formatCurrency(materialWithWaste), '', '');
-      addCostRow('Labor Total', '', '', '', totalLaborHours.toFixed(1), formatCurrency(totalLaborCost));
+      addCostRow('Labor Total', '', '', '', totalLaborDays.toFixed(1), formatCurrency(totalLaborCost));
       addCostRow('Subtotal (Materials + Labor)', '', '', formatCurrency(subtotal), '', '');
       addCostRow(`Overhead (${(overhead*100).toFixed(0)}%)`, '', '', formatCurrency(overheadAmount), '', '');
       addCostRow(`Profit Margin (${(profitMargin*100).toFixed(0)}%)`, '', '', formatCurrency(profitAmount), '', '');
@@ -1179,8 +1313,8 @@
         <p><strong>Total Material Cost:</strong> ${formatCurrency(totalMaterialCost)}</p>
         <p><strong>Total Labor Cost:</strong> ${formatCurrency(totalLaborCost)}</p>
         <p><strong>Total Project Cost:</strong> ${formatCurrency(totalProjectCost)}</p>
-        <p><strong>Labor Requirements:</strong> ${plumbers} plumbers + ${helpers} helpers for ${workDays} days</p>
-        <p><strong>Total Labor Hours:</strong> ${totalLaborHours.toFixed(1)} hours</p>
+        <p><strong>Estimated Work Duration:</strong> ${totalLaborDays.toFixed(1)} days (${(totalLaborDays/5).toFixed(1)} weeks)</p>
+        <p><strong>Productivity Standard:</strong> ${productivityStandard === 'philippines' ? 'Philippines (Manual/Low-tech)' : productivityStandard === 'international' ? 'International (Mechanized/High-tech)' : 'Custom'}</p>
       `;
       
       // Store cost results for PDF
@@ -1191,10 +1325,8 @@
         wasteAmount,
         overheadAmount,
         profitAmount,
-        totalLaborHours,
-        plumbers,
-        helpers,
-        workDays
+        totalLaborDays,
+        productivityStandard
       };
     }
     
@@ -1205,7 +1337,7 @@
     }
     
     // Helper function to add a row to the cost table
-    function addCostRow(item, quantity, unitCost, materialCost, laborHours, laborCost) {
+    function addCostRow(item, quantity, unitCost, materialCost, laborDays, laborCost) {
       const costTable = document.getElementById('costTable');
       const row = costTable.insertRow();
       row.innerHTML = `
@@ -1213,7 +1345,7 @@
         <td>${quantity}</td>
         <td>${unitCost}</td>
         <td>${materialCost}</td>
-        <td>${laborHours}</td>
+        <td>${laborDays}</td>
         <td>${laborCost}</td>
         <td>${materialCost && laborCost ? formatCurrency(parseFloat(materialCost.replace(/[^0-9.-]+/g,"")) + parseFloat(laborCost.replace(/[^0-9.-]+/g,""))) : (materialCost || laborCost || '')}</td>
       `;
@@ -1424,11 +1556,11 @@
           doc.text("Labor Summary", margin, y);
           y += 6;
           doc.setFont("helvetica", "normal");
-          doc.text(`Labor Hours: ${r.totalLaborHours.toFixed(1)} hours`, margin, y);
-          y += 5;
-          doc.text(`Crew: ${r.plumbers} plumbers + ${r.helpers} helpers for ${r.workDays} days`, margin, y);
+          doc.text(`Work Duration: ${r.totalLaborDays.toFixed(1)} days (${(r.totalLaborDays/5).toFixed(1)} weeks)`, margin, y);
           y += 5;
           doc.text(`Labor Cost: ${formatCurrency(r.totalLaborCost)}`, margin, y);
+          y += 5;
+          doc.text(`Productivity Standard: ${r.productivityStandard === 'philippines' ? 'Philippines (Manual/Low-tech)' : r.productivityStandard === 'international' ? 'International (Mechanized/High-tech)' : 'Custom'}`, margin, y);
           y += 10;
         }
         
@@ -1801,9 +1933,8 @@
               </table>
               
               <h3>Labor Requirements</h3>
-              <p><strong>Crew:</strong> ${window.costResults.plumbers} plumbers + ${window.costResults.helpers} helpers</p>
-              <p><strong>Duration:</strong> ${window.costResults.workDays} days</p>
-              <p><strong>Total Labor Hours:</strong> ${window.costResults.totalLaborHours.toFixed(1)} hours</p>
+              <p><strong>Estimated Duration:</strong> ${window.costResults.totalLaborDays.toFixed(1)} days (${(window.costResults.totalLaborDays/5).toFixed(1)} weeks)</p>
+              <p><strong>Productivity Standard:</strong> ${window.costResults.productivityStandard === 'philippines' ? 'Philippines (Manual/Low-tech)' : window.costResults.productivityStandard === 'international' ? 'International (Mechanized/High-tech)' : 'Custom'}</p>
             </div>
             ` : ''}
             
@@ -1812,7 +1943,7 @@
               <p><strong>Plumbing Code:</strong> ${document.getElementById('codeStandard').value.toUpperCase()}</p>
               <p><strong>Units:</strong> ${document.getElementById('units').value}</p>
               <p><strong>Currency:</strong> ${document.getElementById('currency').value}</p>
-              <p><strong>Labor Rate:</strong> ${formatCurrency(parseFloat(document.getElementById('laborRate').value || 50))}/hour</p>
+              <p><strong>Labor Rate:</strong> Plumber: ${formatCurrency(parseFloat(document.getElementById('plumberRate').value || 80))}/hour, Helper: ${formatCurrency(parseFloat(document.getElementById('helperRate').value || 50))}/hour</p>
             </div>
             
             <div class="section">
