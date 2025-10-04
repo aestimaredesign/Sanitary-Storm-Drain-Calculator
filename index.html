@@ -183,12 +183,14 @@
       display: flex;
       border-bottom: 1px solid var(--border);
       margin-bottom: 20px;
+      flex-wrap: wrap;
     }
     
     .tab {
       padding: 10px 20px;
       cursor: pointer;
       border-bottom: 3px solid transparent;
+      white-space: nowrap;
     }
     
     .tab.active {
@@ -331,6 +333,51 @@
       border-radius: 4px;
       font-weight: bold;
     }
+    
+    .formula-section {
+      background: #f0f9ff;
+      padding: 15px;
+      border-radius: 4px;
+      margin: 15px 0;
+      border-left: 4px solid var(--primary);
+    }
+    
+    .formula {
+      font-family: monospace;
+      background: #f8fafc;
+      padding: 10px;
+      border-radius: 4px;
+      margin: 10px 0;
+      border-left: 3px solid var(--primary);
+    }
+    
+    .help-step {
+      margin-bottom: 15px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid #eee;
+    }
+    
+    .help-step h4 {
+      margin: 0 0 8px 0;
+      color: var(--primary);
+    }
+    
+    .reference-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 10px 0;
+      font-size: 0.9em;
+    }
+    
+    .reference-table th, .reference-table td {
+      padding: 8px;
+      text-align: left;
+      border: 1px solid #ddd;
+    }
+    
+    .reference-table th {
+      background-color: #f1f5f9;
+    }
   </style>
 </head>
 <body>
@@ -350,6 +397,7 @@
       <div class="tab" onclick="switchTab('storm')">Storm System</div>
       <div class="tab" onclick="switchTab('costs')">Costs & Labor</div>
       <div class="tab" onclick="switchTab('summary')">Summary & Export</div>
+      <div class="tab" onclick="switchTab('help')">Help & Formulas</div>
     </div>
     
     <!-- Project Information Section -->
@@ -731,8 +779,8 @@
           <div class="form-row">
             <label for="productivityStandard">Productivity Standard:</label>
             <select id="productivityStandard">
-              <option value="philippines">Philippines (Manual/Low-tech)</option>
-              <option value="international">International (Mechanized/High-tech)</option>
+              <option value="philippines">Manual/Low-tech</option>
+              <option value="international">Mechanized/High-tech</option>
               <option value="custom">Custom Productivity Rates</option>
             </select>
           </div>
@@ -789,8 +837,8 @@
             <thead>
               <tr>
                 <th>Work Item</th>
-                <th>Philippines</th>
-                <th>International</th>
+                <th>Manual/Low-tech</th>
+                <th>Mechanized/High-tech</th>
               </tr>
             </thead>
             <tbody>
@@ -821,7 +869,7 @@
               </tr>
             </tbody>
           </table>
-          <p><small>Note: Productivity rates are per crew, not per individual worker. Philippine rates reflect manual labor while international rates assume mechanized equipment.</small></p>
+          <p><small>Note: Productivity rates are per crew, not per individual worker. Manual/Low-tech rates reflect manual labor while Mechanized/High-tech rates assume mechanized equipment.</small></p>
         </div>
         
         <button onclick="calculateCosts()">Calculate Total Costs</button>
@@ -861,6 +909,157 @@
         <div class="export-section">
           <button onclick="exportToPDF()">Export to PDF</button>
           <button onclick="exportToExcel()">Export to Excel</button>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Help & Formulas Section -->
+    <div id="help-tab" class="tab-content">
+      <div class="section">
+        <h2>Help & Formulas</h2>
+        
+        <div class="help-step">
+          <h4>How to Use This Calculator</h4>
+          <p>Follow these steps to calculate your sanitary and storm drain systems:</p>
+          <ol>
+            <li><strong>Project Info:</strong> Enter basic project information and select your preferred units and code standard.</li>
+            <li><strong>Sanitary System:</strong> Enter fixture counts and pipe system details. The calculator will determine DFU (Drainage Fixture Units) and recommend pipe sizes.</li>
+            <li><strong>Storm System:</strong> Enter drainage areas and rainfall data. The calculator will determine runoff and recommend pipe sizes.</li>
+            <li><strong>Costs & Labor:</strong> Enter material costs and labor rates. The calculator will provide a detailed cost breakdown.</li>
+            <li><strong>Summary & Export:</strong> Review the complete project summary and export to PDF or Excel.</li>
+          </ol>
+        </div>
+        
+        <div class="formula-section">
+          <h4>Calculation Formulas</h4>
+          
+          <h5>Sanitary System Calculations</h5>
+          <div class="formula">
+            Total DFU = Σ(Fixture Count × DFU Value per Fixture)
+          </div>
+          <p>Where DFU values are based on the selected plumbing code standard:</p>
+          
+          <table class="reference-table">
+            <thead>
+              <tr>
+                <th>Fixture</th>
+                <th>RNPCP (Philippines)</th>
+                <th>IPC (International)</th>
+                <th>UPC (Uniform)</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Water Closet</td>
+                <td>6</td>
+                <td>4</td>
+                <td>4</td>
+              </tr>
+              <tr>
+                <td>Lavatory</td>
+                <td>1</td>
+                <td>1</td>
+                <td>1</td>
+              </tr>
+              <tr>
+                <td>Kitchen Sink</td>
+                <td>2</td>
+                <td>2</td>
+                <td>2</td>
+              </tr>
+              <tr>
+                <td>Shower</td>
+                <td>2</td>
+                <td>2</td>
+                <td>2</td>
+              </tr>
+              <tr>
+                <td>Bathtub</td>
+                <td>2</td>
+                <td>2</td>
+                <td>2</td>
+              </tr>
+              <tr>
+                <td>Urinal</td>
+                <td>4</td>
+                <td>4</td>
+                <td>4</td>
+              </tr>
+              <tr>
+                <td>Floor Drain</td>
+                <td>2</td>
+                <td>2</td>
+                <td>2</td>
+              </tr>
+            </tbody>
+          </table>
+          
+          <div class="formula">
+            Peak Flow (L/s) = (Total DFU / 2) × 0.06308
+          </div>
+          <div class="formula">
+            Peak Flow (gpm) = Total DFU / 7.5
+          </div>
+          
+          <h5>Storm System Calculations</h5>
+          <div class="formula">
+            Q = (C × I × A) / 3600 (for metric units - L/s)
+          </div>
+          <div class="formula">
+            Q = (C × I × A) / 96.23 (for imperial units - gpm)
+          </div>
+          <p>Where:</p>
+          <ul>
+            <li>Q = Peak runoff flow rate</li>
+            <li>C = Runoff coefficient (0.1-1.0)</li>
+            <li>I = Rainfall intensity (mm/hr or in/hr)</li>
+            <li>A = Drainage area (m² or ft²)</li>
+          </ul>
+          
+          <h5>Cost Calculations</h5>
+          <div class="formula">
+            Material Cost = Σ(Quantity × Unit Cost)
+          </div>
+          <div class="formula">
+            Material Cost with Waste = Material Cost × (1 + Waste Factor)
+          </div>
+          <div class="formula">
+            Labor Cost = Σ(Labor Days × Daily Rate)
+          </div>
+          <div class="formula">
+            Subtotal = Material Cost with Waste + Labor Cost
+          </div>
+          <div class="formula">
+            Overhead = Subtotal × Overhead Percentage
+          </div>
+          <div class="formula">
+            Profit = (Subtotal + Overhead) × Profit Margin
+          </div>
+          <div class="formula">
+            Total Project Cost = Subtotal + Overhead + Profit
+          </div>
+        </div>
+        
+        <div class="help-step">
+          <h4>Standards References</h4>
+          <p>This calculator is based on the following plumbing standards:</p>
+          <ul>
+            <li><strong>RNPCP:</strong> Revised National Plumbing Code of the Philippines</li>
+            <li><strong>IPC:</strong> International Plumbing Code</li>
+            <li><strong>UPC:</strong> Uniform Plumbing Code</li>
+          </ul>
+          <p>For formal design and construction, always consult the complete code provisions and work with a licensed engineer.</p>
+        </div>
+        
+        <div class="help-step">
+          <h4>Tips for Accurate Calculations</h4>
+          <ul>
+            <li>Always verify local rainfall intensity data for storm drain calculations</li>
+            <li>Consider soil conditions and groundwater levels when selecting pipe materials</li>
+            <li>Account for future expansion when sizing pipes</li>
+            <li>Update material costs regularly to reflect current market prices</li>
+            <li>Adjust productivity rates based on site-specific conditions</li>
+          </ul>
         </div>
       </div>
     </div>
@@ -1528,7 +1727,7 @@
         <p><strong>Total Labor Cost:</strong> ${formatCurrency(totalLaborCost)}</p>
         <p><strong>Total Project Cost:</strong> ${formatCurrency(totalProjectCost)}</p>
         <p><strong>Estimated Work Duration:</strong> ${totalLaborDays.toFixed(1)} days (${(totalLaborDays/5).toFixed(1)} weeks)</p>
-        <p><strong>Productivity Standard:</strong> ${productivityStandard === 'philippines' ? 'Philippines (Manual/Low-tech)' : productivityStandard === 'international' ? 'International (Mechanized/High-tech)' : 'Custom'}</p>
+        <p><strong>Productivity Standard:</strong> ${productivityStandard === 'philippines' ? 'Manual/Low-tech' : productivityStandard === 'international' ? 'Mechanized/High-tech' : 'Custom'}</p>
       `;
       
       // Show success message
@@ -1731,7 +1930,10 @@
                     // Remove currency symbols but keep numbers and text
                     text = text.replace(/[₱P,]/g, '').trim();
                     
-                    // FIX SPELLING ERRORS
+                    // FIX SPELLING ERRORS - CORRECTED "Plumber" spelling
+                    if (text.includes('lumber') && !text.includes('Plumber')) {
+                        text = text.replace('lumber', 'Plumber');
+                    }
                     if (text.includes('rofit') || text.includes('Rollt') || text.includes('rollt')) {
                         text = 'Profit Margin';
                     }
