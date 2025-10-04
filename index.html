@@ -881,11 +881,15 @@
     const pipeSizing = {
       sanitary: {
         pvc: { "2": 21, "3": 42, "4": 120, "6": 500 },
-        castIron: { "2": 20, "3": 40, "4": 110, "6": 480 }
+        castIron: { "2": 20, "3": 40, "4": 110, "6": 480 },
+        hdp: { "2": 21, "3": 42, "4": 120, "6": 500 },
+        abs: { "2": 21, "3": 42, "4": 120, "6": 500 }
       },
       storm: {
         pvc: { "4": 25, "6": 75, "8": 180, "10": 320 },
-        corrugated: { "4": 30, "6": 80, "8": 200, "10": 350 }
+        corrugated: { "4": 30, "6": 80, "8": 200, "10": 350 },
+        concrete: { "4": 25, "6": 75, "8": 180, "10": 320 },
+        castIron: { "4": 25, "6": 75, "8": 180, "10": 320 }
       }
     };
     
@@ -1278,6 +1282,18 @@
     
     // Calculate costs with productivity-based labor
     function calculateCosts() {
+      console.log("calculateCosts function called");
+      
+      // Check if we have calculation results
+      if (!window.sanitaryResults && !window.stormResults) {
+        document.getElementById('costsOutput').innerHTML = `
+          <h3>Cost Calculation Error</h3>
+          <p>Please calculate at least one system (Sanitary or Storm) first before calculating costs.</p>
+          <p>Go to the Sanitary System or Storm System tab and click the calculate button.</p>
+        `;
+        return;
+      }
+      
       const productivityStandard = document.getElementById('productivityStandard').value;
       const plumberRate = parseFloat(document.getElementById('plumberRate').value);
       const helperRate = parseFloat(document.getElementById('helperRate').value);
@@ -1513,6 +1529,13 @@
         <p><strong>Total Project Cost:</strong> ${formatCurrency(totalProjectCost)}</p>
         <p><strong>Estimated Work Duration:</strong> ${totalLaborDays.toFixed(1)} days (${(totalLaborDays/5).toFixed(1)} weeks)</p>
         <p><strong>Productivity Standard:</strong> ${productivityStandard === 'philippines' ? 'Philippines (Manual/Low-tech)' : productivityStandard === 'international' ? 'International (Mechanized/High-tech)' : 'Custom'}</p>
+      `;
+      
+      // Show success message
+      document.getElementById('costsOutput').innerHTML = `
+        <h3>Cost Calculation Complete</h3>
+        <p>Total project cost calculated: ${formatCurrency(totalProjectCost)}</p>
+        <p>Check the Summary tab for detailed breakdown.</p>
       `;
       
       // Store cost results for PDF
