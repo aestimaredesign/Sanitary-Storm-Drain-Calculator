@@ -88,31 +88,45 @@
     
     .form-row {
       display: flex;
-      flex-wrap: wrap;
       align-items: center;
       margin-bottom: 15px;
+      gap: 15px;
     }
     
     .form-row label {
-      flex: 1 0 200px;
+      flex: 0 0 180px;
       font-weight: 500;
       margin: 0;
+      text-align: right;
+    }
+    
+    .form-row .input-group {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      gap: 10px;
     }
     
     .form-row input, .form-row select {
-      flex: 2 0 250px;
+      flex: 1;
       padding: 10px;
       border-radius: 5px;
       border: 1px solid var(--border);
       background-color: white;
       color: var(--dark);
       font-size: 1em;
+      min-width: 0;
     }
     
     .form-row input:focus, .form-row select:focus {
       outline: none;
       border-color: var(--primary);
       box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+    }
+    
+    .form-row .unit {
+      flex: 0 0 40px;
+      font-weight: 500;
     }
     
     .checkbox-row {
@@ -378,6 +392,46 @@
     .reference-table th {
       background-color: #f1f5f9;
     }
+    
+    .button-group {
+      display: flex;
+      gap: 10px;
+      margin-top: 20px;
+    }
+    
+    h3 {
+      margin-top: 25px;
+      margin-bottom: 15px;
+      color: var(--primary);
+      font-size: 1.3em;
+    }
+    
+    /* Fix for specific alignment issues */
+    .material-costs .form-row {
+      align-items: flex-start;
+    }
+    
+    .material-costs .form-row label {
+      padding-top: 10px;
+    }
+
+    .pipe-size-inputs {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 10px;
+      margin-top: 10px;
+    }
+    
+    .pipe-size-input {
+      display: flex;
+      flex-direction: column;
+    }
+    
+    .pipe-size-input label {
+      font-size: 0.9em;
+      margin-bottom: 5px;
+      font-weight: 500;
+    }
   </style>
 </head>
 <body>
@@ -407,51 +461,67 @@
         <div class="project-info">
           <div class="form-row">
             <label for="projectName">Project Name:</label>
-            <input type="text" id="projectName" placeholder="Enter Project Name" value="Residential Plumbing Project">
+            <div class="input-group">
+              <input type="text" id="projectName" placeholder="Enter Project Name" value="Residential Plumbing Project">
+            </div>
             <div class="validation-error" id="projectNameError">Project name is required</div>
           </div>
           <div class="form-row">
             <label for="clientName">Client Name:</label>
-            <input type="text" id="clientName" placeholder="Enter Client Name" value="John Dela Cruz">
+            <div class="input-group">
+              <input type="text" id="clientName" placeholder="Enter Client Name" value="John Dela Cruz">
+            </div>
           </div>
           <div class="form-row">
             <label for="projectLocation">Project Location:</label>
-            <input type="text" id="projectLocation" placeholder="Enter Location" value="Manila, Philippines">
+            <div class="input-group">
+              <input type="text" id="projectLocation" placeholder="Enter Location" value="Manila, Philippines">
+            </div>
           </div>
           <div class="form-row">
             <label for="preparedBy">Prepared By:</label>
-            <input type="text" id="preparedBy" placeholder="Enter Name" value="Maria Santos, Civil Engineer">
+            <div class="input-group">
+              <input type="text" id="preparedBy" placeholder="Enter Name" value="Maria Santos, Civil Engineer">
+            </div>
           </div>
           <div class="form-row">
             <label for="currency">Currency:</label>
-            <select id="currency">
-              <option value="PHP">Philippine Peso (₱)</option>
-              <option value="USD">US Dollar ($)</option>
-              <option value="EUR">Euro (€)</option>
-              <option value="JPY">Japanese Yen (¥)</option>
-            </select>
+            <div class="input-group">
+              <select id="currency">
+                <option value="PHP">Philippine Peso (₱)</option>
+                <option value="USD">US Dollar ($)</option>
+                <option value="EUR">Euro (€)</option>
+                <option value="JPY">Japanese Yen (¥)</option>
+              </select>
+            </div>
           </div>
         </div>
         
         <div class="form-row">
           <label for="codeStandard">Plumbing Code Standard:</label>
-          <select id="codeStandard">
-            <option value="rnpcp">RNPCP (Philippines)</option>
-            <option value="ipc">IPC (International)</option>
-            <option value="upc">UPC (Uniform)</option>
-          </select>
+          <div class="input-group">
+            <select id="codeStandard">
+              <option value="rnpcp">RNPCP (Philippines)</option>
+              <option value="ipc">IPC (International)</option>
+              <option value="upc">UPC (Uniform)</option>
+            </select>
+          </div>
         </div>
         
         <div class="form-row">
           <label for="units">Measurement Units:</label>
-          <select id="units">
-            <option value="metric">Metric (m, mm, L/s)</option>
-            <option value="imperial">Imperial (ft, in, gpm)</option>
-          </select>
+          <div class="input-group">
+            <select id="units">
+              <option value="metric">Metric (m, mm, L/s)</option>
+              <option value="imperial">Imperial (ft, in, gpm)</option>
+            </select>
+          </div>
         </div>
         
-        <button onclick="saveProject()">Save Project</button>
-        <button class="secondary" onclick="loadProject()">Load Project</button>
+        <div class="button-group">
+          <button onclick="saveProject()">Save Project</button>
+          <button class="secondary" onclick="loadProject()">Load Project</button>
+        </div>
       </div>
     </div>
     
@@ -463,83 +533,117 @@
         <h3>Fixture Count</h3>
         <div class="form-row">
           <label for="wc">Water Closets:</label>
-          <input type="number" id="wc" value="2" min="0">
+          <div class="input-group">
+            <input type="number" id="wc" value="2" min="0">
+          </div>
         </div>
         <div class="form-row">
           <label for="lav">Lavatories:</label>
-          <input type="number" id="lav" value="2" min="0">
+          <div class="input-group">
+            <input type="number" id="lav" value="2" min="0">
+          </div>
         </div>
         <div class="form-row">
           <label for="sink">Kitchen Sinks:</label>
-          <input type="number" id="sink" value="1" min="0">
+          <div class="input-group">
+            <input type="number" id="sink" value="1" min="0">
+          </div>
         </div>
         <div class="form-row">
           <label for="shower">Showers:</label>
-          <input type="number" id="shower" value="1" min="0">
+          <div class="input-group">
+            <input type="number" id="shower" value="1" min="0">
+          </div>
         </div>
         <div class="form-row">
           <label for="tub">Bathtubs:</label>
-          <input type="number" id="tub" value="1" min="0">
+          <div class="input-group">
+            <input type="number" id="tub" value="1" min="0">
+          </div>
         </div>
         <div class="form-row">
           <label for="urinal">Urinals:</label>
-          <input type="number" id="urinal" value="0" min="0">
+          <div class="input-group">
+            <input type="number" id="urinal" value="0" min="0">
+          </div>
         </div>
         <div class="form-row">
           <label for="floorDrain">Floor Drains:</label>
-          <input type="number" id="floorDrain" value="2" min="0">
+          <div class="input-group">
+            <input type="number" id="floorDrain" value="2" min="0">
+          </div>
         </div>
         
         <h3>Pipe System</h3>
         <div class="form-row">
           <label for="sanLength">Total Developed Length:</label>
-          <input type="number" id="sanLength" value="50" min="0" step="0.1">
-          <span id="sanLengthUnit">m</span>
+          <div class="input-group">
+            <input type="number" id="sanLength" value="50" min="0" step="0.1">
+            <span class="unit" id="sanLengthUnit">m</span>
+          </div>
         </div>
         <div class="form-row">
           <label for="sanPipeMaterial">Pipe Material:</label>
-          <select id="sanPipeMaterial">
-            <option value="pvc">PVC</option>
-            <option value="castIron">Cast Iron</option>
-            <option value="hdp">HDPE</option>
-            <option value="abs">ABS</option>
-          </select>
+          <div class="input-group">
+            <select id="sanPipeMaterial">
+              <option value="pvc">PVC</option>
+              <option value="castIron">Cast Iron</option>
+              <option value="hdp">HDPE</option>
+              <option value="abs">ABS</option>
+            </select>
+          </div>
         </div>
         <div class="form-row">
           <label for="sanPipeLength">Commercial Pipe Length:</label>
-          <select id="sanPipeLength">
-            <option value="3">3 m</option>
-            <option value="6" selected>6 m</option>
-          </select>
+          <div class="input-group">
+            <select id="sanPipeLength">
+              <option value="3">3 m</option>
+              <option value="6" selected>6 m</option>
+            </select>
+          </div>
         </div>
         <div class="form-row">
           <label for="sanSlope">Pipe Slope (%):</label>
-          <input type="number" id="sanSlope" value="2" min="0.5" max="10" step="0.1">
+          <div class="input-group">
+            <input type="number" id="sanSlope" value="2" min="0.5" max="10" step="0.1">
+          </div>
         </div>
         
         <h3>Accessories (optional - will calculate defaults if empty)</h3>
         <div class="form-row">
           <label for="traps">Traps:</label>
-          <input type="number" id="traps" placeholder="Default = # of fixtures" min="0">
+          <div class="input-group">
+            <input type="number" id="traps" placeholder="Default = # of fixtures" min="0">
+          </div>
         </div>
         <div class="form-row">
           <label for="vents">Vents:</label>
-          <input type="number" id="vents" placeholder="Default = 1 per fixture" min="0">
+          <div class="input-group">
+            <input type="number" id="vents" placeholder="Default = 1 per fixture" min="0">
+          </div>
         </div>
         <div class="form-row">
           <label for="cleanouts">Cleanouts:</label>
-          <input type="number" id="cleanouts" placeholder="Default = 1 per 30 m + bends" min="0">
+          <div class="input-group">
+            <input type="number" id="cleanouts" placeholder="Default = 1 per 30 m + bends" min="0">
+          </div>
         </div>
         <div class="form-row">
           <label for="sanManholes">Manholes:</label>
-          <input type="number" id="sanManholes" placeholder="Default = 1 per 50 m" min="0">
+          <div class="input-group">
+            <input type="number" id="sanManholes" placeholder="Default = 1 per 50 m" min="0">
+          </div>
         </div>
         <div class="form-row">
           <label for="sanFittings">Fittings/Elbows:</label>
-          <input type="number" id="sanFittings" placeholder="Default = 1 per 10 m" min="0">
+          <div class="input-group">
+            <input type="number" id="sanFittings" placeholder="Default = 1 per 10 m" min="0">
+          </div>
         </div>
         
-        <button onclick="calculateSanitary()">Calculate Sanitary System</button>
+        <div class="button-group">
+          <button onclick="calculateSanitary()">Calculate Sanitary System</button>
+        </div>
         <div class="output" id="sanitaryOutput"></div>
       </div>
     </div>
@@ -552,70 +656,96 @@
         <h3>Runoff Calculation</h3>
         <div class="form-row">
           <label for="roofArea">Roof Area:</label>
-          <input type="number" id="roofArea" value="200" min="0" step="0.1">
-          <span id="roofAreaUnit">m²</span>
+          <div class="input-group">
+            <input type="number" id="roofArea" value="200" min="0" step="0.1">
+            <span class="unit" id="roofAreaUnit">m²</span>
+          </div>
         </div>
         <div class="form-row">
           <label for="pavementArea">Pavement Area:</label>
-          <input type="number" id="pavementArea" value="0" min="0" step="0.1">
-          <span id="pavementAreaUnit">m²</span>
+          <div class="input-group">
+            <input type="number" id="pavementArea" value="0" min="0" step="0.1">
+            <span class="unit" id="pavementAreaUnit">m²</span>
+          </div>
         </div>
         <div class="form-row">
           <label for="coef">Runoff Coefficient (C):</label>
-          <input type="number" id="coef" value="0.9" min="0.1" max="1" step="0.05">
+          <div class="input-group">
+            <input type="number" id="coef" value="0.9" min="0.1" max="1" step="0.05">
+          </div>
         </div>
         <div class="form-row">
           <label for="intensity">Rainfall Intensity:</label>
-          <input type="number" id="intensity" value="50" min="1" step="1">
-          <span id="intensityUnit">mm/hr</span>
+          <div class="input-group">
+            <input type="number" id="intensity" value="50" min="1" step="1">
+            <span class="unit" id="intensityUnit">mm/hr</span>
+          </div>
         </div>
         
         <h3>Pipe System</h3>
         <div class="form-row">
           <label for="stormLength">Total Developed Length:</label>
-          <input type="number" id="stormLength" value="60" min="0" step="0.1">
-          <span id="stormLengthUnit">m</span>
+          <div class="input-group">
+            <input type="number" id="stormLength" value="60" min="0" step="0.1">
+            <span class="unit" id="stormLengthUnit">m</span>
+          </div>
         </div>
         <div class="form-row">
           <label for="stormPipeMaterial">Pipe Material:</label>
-          <select id="stormPipeMaterial">
-            <option value="pvc">PVC</option>
-            <option value="corrugated">Corrugated HDPE</option>
-            <option value="concrete">Concrete</option>
-            <option value="castIron">Cast Iron</option>
-          </select>
+          <div class="input-group">
+            <select id="stormPipeMaterial">
+              <option value="pvc">PVC</option>
+              <option value="corrugated">Corrugated HDPE</option>
+              <option value="concrete">Concrete</option>
+              <option value="castIron">Cast Iron</option>
+            </select>
+          </div>
         </div>
         <div class="form-row">
           <label for="stormPipeLength">Commercial Pipe Length:</label>
-          <select id="stormPipeLength">
-            <option value="3">3 m</option>
-            <option value="6" selected>6 m</option>
-          </select>
+          <div class="input-group">
+            <select id="stormPipeLength">
+              <option value="3">3 m</option>
+              <option value="6" selected>6 m</option>
+            </select>
+          </div>
         </div>
         <div class="form-row">
           <label for="stormSlope">Pipe Slope (%):</label>
-          <input type="number" id="stormSlope" value="1" min="0.5" max="10" step="0.1">
+          <div class="input-group">
+            <input type="number" id="stormSlope" value="1" min="0.5" max="10" step="0.1">
+          </div>
         </div>
         
         <h3>Accessories (optional - will calculate defaults if empty)</h3>
         <div class="form-row">
           <label for="downspouts">Downspouts:</label>
-          <input type="number" id="downspouts" placeholder="Default = 1 per 100 m² roof" min="0">
+          <div class="input-group">
+            <input type="number" id="downspouts" placeholder="Default = 1 per 100 m² roof" min="0">
+          </div>
         </div>
         <div class="form-row">
           <label for="catchBasins">Catch Basins:</label>
-          <input type="number" id="catchBasins" placeholder="Default = every 60 m" min="0">
+          <div class="input-group">
+            <input type="number" id="catchBasins" placeholder="Default = every 60 m" min="0">
+          </div>
         </div>
         <div class="form-row">
           <label for="stormManholes">Manholes:</label>
-          <input type="number" id="stormManholes" placeholder="Default = every 50 m" min="0">
+          <div class="input-group">
+            <input type="number" id="stormManholes" placeholder="Default = every 50 m" min="0">
+          </div>
         </div>
         <div class="form-row">
           <label for="stormFittings">Fittings/Elbows:</label>
-          <input type="number" id="stormFittings" placeholder="Default = 1 per 10 m" min="0">
+          <div class="input-group">
+            <input type="number" id="stormFittings" placeholder="Default = 1 per 10 m" min="0">
+          </div>
         </div>
         
-        <button onclick="calculateStorm()">Calculate Storm Drain System</button>
+        <div class="button-group">
+          <button onclick="calculateStorm()">Calculate Storm Drain System</button>
+        </div>
         <div class="output" id="stormOutput"></div>
       </div>
     </div>
@@ -632,17 +762,33 @@
             <h4>PVC Pipe</h4>
             <div class="form-row">
               <label for="pvcPipeSize">Select Size:</label>
-              <select id="pvcPipeSize" onchange="showPipeSizeInputs('pvc')">
-                <option value="2">2"</option>
-                <option value="3">3"</option>
-                <option value="4">4"</option>
-                <option value="6">6"</option>
-              </select>
+              <div class="input-group">
+                <select id="pvcPipeSize" onchange="showPipeSizeInputs('pvc')">
+                  <option value="2">2"</option>
+                  <option value="3">3"</option>
+                  <option value="4">4"</option>
+                  <option value="6">6"</option>
+                </select>
+              </div>
             </div>
             <div id="pvcPipeInputs" class="pipe-size-group active">
-              <div class="form-row">
-                <label for="pvcPipeCost2">Cost per section:</label>
-                <input type="number" id="pvcPipeCost2" value="25" min="0" step="0.01">
+              <div class="pipe-size-inputs">
+                <div class="pipe-size-input">
+                  <label for="pvcPipeCost2">2" PVC Pipe Cost:</label>
+                  <input type="number" id="pvcPipeCost2" value="25" min="0" step="0.01">
+                </div>
+                <div class="pipe-size-input">
+                  <label for="pvcPipeCost3">3" PVC Pipe Cost:</label>
+                  <input type="number" id="pvcPipeCost3" value="35" min="0" step="0.01">
+                </div>
+                <div class="pipe-size-input">
+                  <label for="pvcPipeCost4">4" PVC Pipe Cost:</label>
+                  <input type="number" id="pvcPipeCost4" value="50" min="0" step="0.01">
+                </div>
+                <div class="pipe-size-input">
+                  <label for="pvcPipeCost6">6" PVC Pipe Cost:</label>
+                  <input type="number" id="pvcPipeCost6" value="85" min="0" step="0.01">
+                </div>
               </div>
             </div>
           </div>
@@ -651,17 +797,33 @@
             <h4>Cast Iron Pipe</h4>
             <div class="form-row">
               <label for="castIronPipeSize">Select Size:</label>
-              <select id="castIronPipeSize" onchange="showPipeSizeInputs('castIron')">
-                <option value="2">2"</option>
-                <option value="3">3"</option>
-                <option value="4">4"</option>
-                <option value="6">6"</option>
-              </select>
+              <div class="input-group">
+                <select id="castIronPipeSize" onchange="showPipeSizeInputs('castIron')">
+                  <option value="2">2"</option>
+                  <option value="3">3"</option>
+                  <option value="4">4"</option>
+                  <option value="6">6"</option>
+                </select>
+              </div>
             </div>
             <div id="castIronPipeInputs" class="pipe-size-group">
-              <div class="form-row">
-                <label for="castIronPipeCost2">Cost per section:</label>
-                <input type="number" id="castIronPipeCost2" value="65" min="0" step="0.01">
+              <div class="pipe-size-inputs">
+                <div class="pipe-size-input">
+                  <label for="castIronPipeCost2">2" Cast Iron Pipe Cost:</label>
+                  <input type="number" id="castIronPipeCost2" value="65" min="0" step="0.01">
+                </div>
+                <div class="pipe-size-input">
+                  <label for="castIronPipeCost3">3" Cast Iron Pipe Cost:</label>
+                  <input type="number" id="castIronPipeCost3" value="95" min="0" step="0.01">
+                </div>
+                <div class="pipe-size-input">
+                  <label for="castIronPipeCost4">4" Cast Iron Pipe Cost:</label>
+                  <input type="number" id="castIronPipeCost4" value="130" min="0" step="0.01">
+                </div>
+                <div class="pipe-size-input">
+                  <label for="castIronPipeCost6">6" Cast Iron Pipe Cost:</label>
+                  <input type="number" id="castIronPipeCost6" value="200" min="0" step="0.01">
+                </div>
               </div>
             </div>
           </div>
@@ -670,17 +832,33 @@
             <h4>HDPE Pipe</h4>
             <div class="form-row">
               <label for="hdpPipeSize">Select Size:</label>
-              <select id="hdpPipeSize" onchange="showPipeSizeInputs('hdp')">
-                <option value="2">2"</option>
-                <option value="3">3"</option>
-                <option value="4">4"</option>
-                <option value="6">6"</option>
-              </select>
+              <div class="input-group">
+                <select id="hdpPipeSize" onchange="showPipeSizeInputs('hdp')">
+                  <option value="2">2"</option>
+                  <option value="3">3"</option>
+                  <option value="4">4"</option>
+                  <option value="6">6"</option>
+                </select>
+              </div>
             </div>
             <div id="hdpPipeInputs" class="pipe-size-group">
-              <div class="form-row">
-                <label for="hdpPipeCost2">Cost per section:</label>
-                <input type="number" id="hdpPipeCost2" value="32" min="0" step="0.01">
+              <div class="pipe-size-inputs">
+                <div class="pipe-size-input">
+                  <label for="hdpPipeCost2">2" HDPE Pipe Cost:</label>
+                  <input type="number" id="hdpPipeCost2" value="32" min="0" step="0.01">
+                </div>
+                <div class="pipe-size-input">
+                  <label for="hdpPipeCost3">3" HDPE Pipe Cost:</label>
+                  <input type="number" id="hdpPipeCost3" value="45" min="0" step="0.01">
+                </div>
+                <div class="pipe-size-input">
+                  <label for="hdpPipeCost4">4" HDPE Pipe Cost:</label>
+                  <input type="number" id="hdpPipeCost4" value="65" min="0" step="0.01">
+                </div>
+                <div class="pipe-size-input">
+                  <label for="hdpPipeCost6">6" HDPE Pipe Cost:</label>
+                  <input type="number" id="hdpPipeCost6" value="110" min="0" step="0.01">
+                </div>
               </div>
             </div>
           </div>
@@ -689,17 +867,33 @@
             <h4>ABS Pipe</h4>
             <div class="form-row">
               <label for="absPipeSize">Select Size:</label>
-              <select id="absPipeSize" onchange="showPipeSizeInputs('abs')">
-                <option value="2">2"</option>
-                <option value="3">3"</option>
-                <option value="4">4"</option>
-                <option value="6">6"</option>
-              </select>
+              <div class="input-group">
+                <select id="absPipeSize" onchange="showPipeSizeInputs('abs')">
+                  <option value="2">2"</option>
+                  <option value="3">3"</option>
+                  <option value="4">4"</option>
+                  <option value="6">6"</option>
+                </select>
+              </div>
             </div>
             <div id="absPipeInputs" class="pipe-size-group">
-              <div class="form-row">
-                <label for="absPipeCost2">Cost per section:</label>
-                <input type="number" id="absPipeCost2" value="28" min="0" step="0.01">
+              <div class="pipe-size-inputs">
+                <div class="pipe-size-input">
+                  <label for="absPipeCost2">2" ABS Pipe Cost:</label>
+                  <input type="number" id="absPipeCost2" value="28" min="0" step="0.01">
+                </div>
+                <div class="pipe-size-input">
+                  <label for="absPipeCost3">3" ABS Pipe Cost:</label>
+                  <input type="number" id="absPipeCost3" value="40" min="0" step="0.01">
+                </div>
+                <div class="pipe-size-input">
+                  <label for="absPipeCost4">4" ABS Pipe Cost:</label>
+                  <input type="number" id="absPipeCost4" value="55" min="0" step="0.01">
+                </div>
+                <div class="pipe-size-input">
+                  <label for="absPipeCost6">6" ABS Pipe Cost:</label>
+                  <input type="number" id="absPipeCost6" value="90" min="0" step="0.01">
+                </div>
               </div>
             </div>
           </div>
@@ -708,17 +902,33 @@
             <h4>Corrugated HDPE</h4>
             <div class="form-row">
               <label for="corrugatedPipeSize">Select Size:</label>
-              <select id="corrugatedPipeSize" onchange="showPipeSizeInputs('corrugated')">
-                <option value="4">4"</option>
-                <option value="6">6"</option>
-                <option value="8">8"</option>
-                <option value="10">10"</option>
-              </select>
+              <div class="input-group">
+                <select id="corrugatedPipeSize" onchange="showPipeSizeInputs('corrugated')">
+                  <option value="4">4"</option>
+                  <option value="6">6"</option>
+                  <option value="8">8"</option>
+                  <option value="10">10"</option>
+                </select>
+              </div>
             </div>
             <div id="corrugatedPipeInputs" class="pipe-size-group">
-              <div class="form-row">
-                <label for="corrugatedPipeCost4">Cost per section:</label>
-                <input type="number" id="corrugatedPipeCost4" value="15" min="0" step="0.01">
+              <div class="pipe-size-inputs">
+                <div class="pipe-size-input">
+                  <label for="corrugatedPipeCost4">4" Corrugated HDPE Cost:</label>
+                  <input type="number" id="corrugatedPipeCost4" value="15" min="0" step="0.01">
+                </div>
+                <div class="pipe-size-input">
+                  <label for="corrugatedPipeCost6">6" Corrugated HDPE Cost:</label>
+                  <input type="number" id="corrugatedPipeCost6" value="25" min="0" step="0.01">
+                </div>
+                <div class="pipe-size-input">
+                  <label for="corrugatedPipeCost8">8" Corrugated HDPE Cost:</label>
+                  <input type="number" id="corrugatedPipeCost8" value="40" min="0" step="0.01">
+                </div>
+                <div class="pipe-size-input">
+                  <label for="corrugatedPipeCost10">10" Corrugated HDPE Cost:</label>
+                  <input type="number" id="corrugatedPipeCost10" value="60" min="0" step="0.01">
+                </div>
               </div>
             </div>
           </div>
@@ -727,17 +937,33 @@
             <h4>Concrete Pipe</h4>
             <div class="form-row">
               <label for="concretePipeSize">Select Size:</label>
-              <select id="concretePipeSize" onchange="showPipeSizeInputs('concrete')">
-                <option value="4">4"</option>
-                <option value="6">6"</option>
-                <option value="8">8"</option>
-                <option value="10">10"</option>
-              </select>
+              <div class="input-group">
+                <select id="concretePipeSize" onchange="showPipeSizeInputs('concrete')">
+                  <option value="4">4"</option>
+                  <option value="6">6"</option>
+                  <option value="8">8"</option>
+                  <option value="10">10"</option>
+                </select>
+              </div>
             </div>
             <div id="concretePipeInputs" class="pipe-size-group">
-              <div class="form-row">
-                <label for="concretePipeCost4">Cost per section:</label>
-                <input type="number" id="concretePipeCost4" value="55" min="0" step="0.01">
+              <div class="pipe-size-inputs">
+                <div class="pipe-size-input">
+                  <label for="concretePipeCost4">4" Concrete Pipe Cost:</label>
+                  <input type="number" id="concretePipeCost4" value="55" min="0" step="0.01">
+                </div>
+                <div class="pipe-size-input">
+                  <label for="concretePipeCost6">6" Concrete Pipe Cost:</label>
+                  <input type="number" id="concretePipeCost6" value="85" min="0" step="0.01">
+                </div>
+                <div class="pipe-size-input">
+                  <label for="concretePipeCost8">8" Concrete Pipe Cost:</label>
+                  <input type="number" id="concretePipeCost8" value="120" min="0" step="0.01">
+                </div>
+                <div class="pipe-size-input">
+                  <label for="concretePipeCost10">10" Concrete Pipe Cost:</label>
+                  <input type="number" id="concretePipeCost10" value="180" min="0" step="0.01">
+                </div>
               </div>
             </div>
           </div>
@@ -746,31 +972,45 @@
           
           <div class="form-row">
             <label for="trapCost">Trap Cost (each):</label>
-            <input type="number" id="trapCost" value="15" min="0" step="0.01">
+            <div class="input-group">
+              <input type="number" id="trapCost" value="15" min="0" step="0.01">
+            </div>
           </div>
           <div class="form-row">
             <label for="ventCost">Vent Cost (each):</label>
-            <input type="number" id="ventCost" value="8" min="0" step="0.01">
+            <div class="input-group">
+              <input type="number" id="ventCost" value="8" min="0" step="0.01">
+            </div>
           </div>
           <div class="form-row">
             <label for="cleanoutCost">Cleanout Cost (each):</label>
-            <input type="number" id="cleanoutCost" value="25" min="0" step="0.01">
+            <div class="input-group">
+              <input type="number" id="cleanoutCost" value="25" min="0" step="0.01">
+            </div>
           </div>
           <div class="form-row">
             <label for="manholeCost">Manhole Cost (each):</label>
-            <input type="number" id="manholeCost" value="500" min="0" step="0.01">
+            <div class="input-group">
+              <input type="number" id="manholeCost" value="500" min="0" step="0.01">
+            </div>
           </div>
           <div class="form-row">
             <label for="fittingCost">Fitting/Elbow Cost (each):</label>
-            <input type="number" id="fittingCost" value="8" min="0" step="0.01">
+            <div class="input-group">
+              <input type="number" id="fittingCost" value="8" min="0" step="0.01">
+            </div>
           </div>
           <div class="form-row">
             <label for="downspoutCost">Downspout Cost (each):</label>
-            <input type="number" id="downspoutCost" value="45" min="0" step="0.01">
+            <div class="input-group">
+              <input type="number" id="downspoutCost" value="45" min="0" step="0.01">
+            </div>
           </div>
           <div class="form-row">
             <label for="catchBasinCost">Catch Basin Cost (each):</label>
-            <input type="number" id="catchBasinCost" value="150" min="0" step="0.01">
+            <div class="input-group">
+              <input type="number" id="catchBasinCost" value="150" min="0" step="0.01">
+            </div>
           </div>
         </div>
         
@@ -778,56 +1018,78 @@
           <h3>Labor Requirements</h3>
           <div class="form-row">
             <label for="productivityStandard">Productivity Standard:</label>
-            <select id="productivityStandard">
-              <option value="philippines">Manual/Low-tech</option>
-              <option value="international">Mechanized/High-tech</option>
-              <option value="custom">Custom Productivity Rates</option>
-            </select>
+            <div class="input-group">
+              <select id="productivityStandard">
+                <option value="philippines">Manual/Low-tech</option>
+                <option value="international">Mechanized/High-tech</option>
+                <option value="custom">Custom Productivity Rates</option>
+              </select>
+            </div>
           </div>
           
           <div id="customProductivityRates" style="display: none;">
             <h4>Custom Productivity Rates</h4>
             <div class="form-row">
               <label for="customPipeLaying">Pipe Laying (m/day):</label>
-              <input type="number" id="customPipeLaying" value="10" min="1" step="0.1">
+              <div class="input-group">
+                <input type="number" id="customPipeLaying" value="10" min="1" step="0.1">
+              </div>
             </div>
             <div class="form-row">
               <label for="customManhole">Manhole Construction (units/day):</label>
-              <input type="number" id="customManhole" value="0.8" min="0.1" step="0.1">
+              <div class="input-group">
+                <input type="number" id="customManhole" value="0.8" min="0.1" step="0.1">
+              </div>
             </div>
             <div class="form-row">
               <label for="customCatchBasin">Catch Basin (units/day):</label>
-              <input type="number" id="customCatchBasin" value="1.2" min="0.1" step="0.1">
+              <div class="input-group">
+                <input type="number" id="customCatchBasin" value="1.2" min="0.1" step="0.1">
+              </div>
             </div>
             <div class="form-row">
               <label for="customFitting">Fittings Installation (units/day):</label>
-              <input type="number" id="customFitting" value="20" min="1" step="1">
+              <div class="input-group">
+                <input type="number" id="customFitting" value="20" min="1" step="1">
+              </div>
             </div>
           </div>
           
           <div class="form-row">
             <label for="plumberRate">Plumber Rate (per hour):</label>
-            <input type="number" id="plumberRate" value="80" min="0" step="0.1">
+            <div class="input-group">
+              <input type="number" id="plumberRate" value="80" min="0" step="0.1">
+            </div>
           </div>
           <div class="form-row">
             <label for="helperRate">Helper Rate (per hour):</label>
-            <input type="number" id="helperRate" value="50" min="0" step="0.1">
+            <div class="input-group">
+              <input type="number" id="helperRate" value="50" min="0" step="0.1">
+            </div>
           </div>
           <div class="form-row">
             <label for="dailyHours">Daily Work Hours:</label>
-            <input type="number" id="dailyHours" value="8" min="1" max="12">
+            <div class="input-group">
+              <input type="number" id="dailyHours" value="8" min="1" max="12">
+            </div>
           </div>
           <div class="form-row">
             <label for="wasteFactor">Waste Factor (%):</label>
-            <input type="number" id="wasteFactor" value="5" min="0" max="20">
+            <div class="input-group">
+              <input type="number" id="wasteFactor" value="5" min="0" max="20">
+            </div>
           </div>
           <div class="form-row">
             <label for="overhead">Overhead (%):</label>
-            <input type="number" id="overhead" value="15" min="0" max="30">
+            <div class="input-group">
+              <input type="number" id="overhead" value="15" min="0" max="30">
+            </div>
           </div>
           <div class="form-row">
             <label for="profitMargin">Profit Margin (%):</label>
-            <input type="number" id="profitMargin" value="10" min="0" max="30">
+            <div class="input-group">
+              <input type="number" id="profitMargin" value="10" min="0" max="30">
+            </div>
           </div>
         </div>
         
@@ -872,7 +1134,9 @@
           <p><small>Note: Productivity rates are per crew, not per individual worker. Manual/Low-tech rates reflect manual labor while Mechanized/High-tech rates assume mechanized equipment.</small></p>
         </div>
         
-        <button onclick="calculateCosts()">Calculate Total Costs</button>
+        <div class="button-group">
+          <button onclick="calculateCosts()">Calculate Total Costs</button>
+        </div>
         <div class="output" id="costsOutput"></div>
       </div>
     </div>
@@ -1160,15 +1424,7 @@
       });
       
       // Show selected pipe size inputs
-      const sizeSelect = document.getElementById(materialType + 'PipeSize');
-      const selectedSize = sizeSelect.value;
       const inputsGroup = document.getElementById(materialType + 'PipeInputs');
-      
-      // Update the input label and ID based on selected size
-      const input = inputsGroup.querySelector('input');
-      input.id = materialType + 'PipeCost' + selectedSize;
-      input.previousElementSibling.textContent = `Cost per section (${selectedSize}"):`;
-      
       inputsGroup.classList.add('active');
     }
     
