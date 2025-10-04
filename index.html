@@ -1709,302 +1709,279 @@
       input.click();
     }
     
+    // Extract data directly from the displayed BOQ table with CORRECTED spelling
+    function extractBOQDataFromDisplay() {
+        const table = document.getElementById('costTable');
+        if (!table) {
+            return getFallbackData();
+        }
+        
+        const rows = table.querySelectorAll('tr');
+        const data = [];
+        let isFirstHeaderRow = true; // Flag to track if we've already added the header
+        
+        rows.forEach(row => {
+            const cells = row.querySelectorAll('td, th');
+            const rowData = ['', '', '', '', '']; // Initialize with 5 empty columns
+            
+            cells.forEach((cell, index) => {
+                if (index < 5) {
+                    let text = cell.textContent.trim();
+                    
+                    // Remove currency symbols but keep numbers and text
+                    text = text.replace(/[₱P,]/g, '').trim();
+                    
+                    // FIX SPELLING ERRORS
+                    if (text.includes('rofit') || text.includes('Rollt') || text.includes('rollt')) {
+                        text = 'Profit Margin';
+                    }
+                    if (text.includes('ROJECT') || text.includes('ROUECT') || text.includes('ROECT')) {
+                        text = 'TOTAL PROJECT COST';
+                    }
+                    if (text === 'TOTAL ROJECT COST') {
+                        text = 'TOTAL PROJECT COST';
+                    }
+                    if (text === 'rofit Margin') {
+                        text = 'Profit Margin';
+                    }
+                    
+                    rowData[index] = text;
+                }
+            });
+            
+            // Skip the second header row (the one with "Description, Quantity, Unit, Unit Rate, Amount")
+            const isHeaderRow = rowData[0] === 'Description' && 
+                               rowData[1] === 'Quantity' && 
+                               rowData[2] === 'Unit' && 
+                               rowData[3] === 'Unit Rate' && 
+                               rowData[4] === 'Amount';
+            
+            if (isHeaderRow) {
+                if (isFirstHeaderRow) {
+                    // Add only the first header row
+                    data.push(rowData);
+                    isFirstHeaderRow = false;
+                }
+                // Skip any subsequent header rows
+                return;
+            }
+            
+            // Fix the structure for summary rows - ensure amounts are only in column 4
+            if (rowData[0].includes("Materials Subtotal") || 
+                rowData[0].includes("Waste") || 
+                rowData[0].includes("Materials Total") || 
+                rowData[0].includes("Labor Total") || 
+                rowData[0].includes("Materials + Labor") || 
+                rowData[0].includes("Overhead") || 
+                rowData[0].includes("Profit Margin") || 
+                rowData[0].includes("TOTAL PROJECT COST")) {
+                
+                // If amount is wrongly placed in quantity column (column 1), move it to amount column (column 4)
+                if (rowData[1] && rowData[1].match(/[\d.,]/) && !rowData[4]) {
+                    rowData[4] = rowData[1]; // Move amount from column 1 to column 4
+                    rowData[1] = ''; // Clear column 1
+                }
+                
+                // If amount is wrongly placed in unit rate column (column 3), move it to amount column (column 4)
+                if (rowData[3] && rowData[3].match(/[\d.,]/) && !rowData[4]) {
+                    rowData[4] = rowData[3]; // Move amount from column 3 to column 4
+                    rowData[3] = ''; // Clear column 3
+                }
+                
+                // Ensure columns 1, 2, 3 are empty for summary rows
+                rowData[1] = ''; // Quantity column
+                rowData[2] = ''; // Unit column  
+                rowData[3] = ''; // Unit Rate column
+            }
+            
+            if (!rowData.every(cell => cell === '')) {
+                data.push(rowData);
+            }
+        });
+        
+        return data.length > 0 ? data : getFallbackData();
+    }
+
     // Export to PDF
     function exportToPDF() {
-      try {
-        const { jsPDF } = window.jspdf;
-        const doc = new jsPDF();
+        try {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
 
-        // Get project information
-        const projectName = document.getElementById("projectName")?.value || "Sanitary & Storm Project";
-        const clientName = document.getElementById("clientName")?.value || "Client Name";
-        const projectLocation = document.getElementById("projectLocation")?.value || "Project Location";
-        const preparedBy = document.getElementById("preparedBy")?.value || "Prepared By";
-        const date = new Date().toLocaleDateString();
+            // Get project information
+            const projectName = document.getElementById("projectName")?.value || "Sanitary & Storm Project";
+            const clientName = document.getElementById("clientName")?.value || "Client Name";
+            const projectLocation = document.getElementById("projectLocation")?.value || "Project Location";
+            const preparedBy = document.getElementById("preparedBy")?.value || "Prepared By";
+            const date = new Date().toLocaleDateString();
 
-        // Set margins and initial position
-        const margin = 15;
-        let y = margin;
+            // Get the actual calculated values from the displayed BOQ table
+            const boqTable = extractBOQDataFromDisplay();
+            
+            // Remove the header row from the table data since we'll add it manually in autoTable
+            const tableBody = boqTable.filter(row => 
+                !(row[0] === 'Description' && row[1] === 'Quantity' && row[2] === 'Unit' && row[3] === 'Unit Rate' && row[4] === 'Amount')
+            );
 
-        // Add header information
-        doc.setFontSize(18);
-        doc.setFont("helvetica", "bold");
-        doc.text("Sanitary & Storm Drain Report", margin, y);
-        y += 10;
+            // Set margins and initial position
+            const margin = 15;
+            let y = margin;
 
-        doc.setFontSize(10);
-        doc.setFont("helvetica", "normal");
-        doc.text(`Project: ${projectName}`, margin, y);
-        doc.text(`Client: ${clientName}`, 100, y);
-        y += 5;
-        doc.text(`Location: ${projectLocation}`, margin, y);
-        doc.text(`Date: ${date}`, 100, y);
-        y += 5;
-        doc.text(`Prepared by: ${preparedBy}`, margin, y);
-        y += 10;
+            // Add header information
+            doc.setFontSize(18);
+            doc.setFont("helvetica", "bold");
+            doc.text("Sanitary & Storm Drain Report", margin, y);
+            y += 10;
 
-        // Add system summaries
-        if (window.sanitaryResults) {
-          const r = window.sanitaryResults;
-          doc.setFontSize(11);
-          doc.setFont("helvetica", "bold");
-          doc.text("Sanitary System Summary", margin, y);
-          y += 6;
-          doc.setFont("helvetica", "normal");
-          doc.text(`Peak Flow: ${r.flowRate.toFixed(2)} ${r.flowUnit}`, margin, y);
-          y += 5;
-          doc.text(`Pipe: ${r.pipeQty} sections of ${r.pipeSize}" ${r.pipeMaterial} (${r.runLength} ${r.lengthUnit})`, margin, y);
-          y += 5;
-          doc.text(`Accessories: ${r.traps} traps, ${r.vents} vents, ${r.cleanouts} cleanouts, ${r.manholes} manholes`, margin, y);
-          y += 10;
+            doc.setFontSize(10);
+            doc.setFont("helvetica", "normal");
+            doc.text(`Project: ${projectName}`, margin, y);
+            doc.text(`Client: ${clientName}`, 100, y);
+            y += 5;
+            doc.text(`Location: ${projectLocation}`, margin, y);
+            doc.text(`Date: ${date}`, 100, y);
+            y += 5;
+            doc.text(`Prepared by: ${preparedBy}`, margin, y);
+            y += 10;
+
+            // Add system summaries
+            if (window.sanitaryResults) {
+                const r = window.sanitaryResults;
+                doc.setFontSize(11);
+                doc.setFont("helvetica", "bold");
+                doc.text("Sanitary System Summary", margin, y);
+                y += 6;
+                doc.setFont("helvetica", "normal");
+                doc.text(`Peak Flow: ${r.flowRate.toFixed(2)} ${r.flowUnit}`, margin, y);
+                y += 5;
+                doc.text(`Pipe: ${r.pipeQty} sections of ${r.pipeSize}" ${r.pipeMaterial} (${r.runLength} ${r.lengthUnit})`, margin, y);
+                y += 5;
+                doc.text(`Accessories: ${r.traps} traps, ${r.vents} vents, ${r.cleanouts} cleanouts, ${r.manholes} manholes`, margin, y);
+                y += 10;
+            }
+            
+            if (window.stormResults) {
+                const r = window.stormResults;
+                doc.setFontSize(11);
+                doc.setFont("helvetica", "bold");
+                doc.text("Storm System Summary", margin, y);
+                y += 6;
+                doc.setFont("helvetica", "normal");
+                doc.text(`Peak Runoff: ${r.flowRate.toFixed(2)} ${r.flowUnit}`, margin, y);
+                y += 5;
+                doc.text(`Drainage Area: ${r.totalArea.toFixed(1)} ${r.areaUnit}`, margin, y);
+                y += 5;
+                doc.text(`Pipe: ${r.pipeQty} sections of ${r.pipeSize}" ${r.pipeMaterial} (${r.runLength} ${r.lengthUnit})`, margin, y);
+                y += 5;
+                doc.text(`Accessories: ${r.downspouts} downspouts, ${r.catchBasins} catch basins, ${r.manholes} manholes`, margin, y);
+                y += 10;
+            }
+            
+            // Add Bill of Quantities title
+            doc.setFontSize(14);
+            doc.setFont("helvetica", "bold");
+            doc.text("Bill of Quantities", margin, y);
+            y += 8;
+
+            // Configure and draw the table - ONLY use body data, header is defined separately
+            doc.autoTable({
+                head: [["Description", "Quantity", "Unit", "Unit Rate", "Amount"]],
+                body: tableBody,
+                startY: y,
+                theme: "grid",
+                styles: {
+                    fontSize: 8,
+                    cellPadding: 3,
+                    valign: "middle",
+                    lineColor: [0, 0, 0],
+                    lineWidth: 0.1
+                },
+                columnStyles: {
+                    0: { halign: "left", cellWidth: 70 },
+                    1: { halign: "center", cellWidth: 25 },
+                    2: { halign: "center", cellWidth: 20 },
+                    3: { halign: "right", cellWidth: 30 },
+                    4: { halign: "right", cellWidth: 35 }
+                },
+                headStyles: {
+                    fillColor: [220, 220, 220],
+                    textColor: 0,
+                    fontStyle: "bold",
+                    lineWidth: 0.1
+                },
+                alternateRowStyles: {
+                    fillColor: [245, 245, 245]
+                },
+                didParseCell: function(data) {
+                    const cellValue = (data.cell.raw || "").toString();
+                    
+                    // Style section headers
+                    if (cellValue === "Materials" || cellValue === "Labor" || cellValue === "Summary") {
+                        data.cell.styles.fillColor = [224, 224, 224];
+                        data.cell.styles.fontStyle = 'bold';
+                        data.cell.styles.halign = 'left';
+                        data.cell.colSpan = 5;
+                    }
+                    
+                    // Style totals and subtotals
+                    if (cellValue.includes("Subtotal") || cellValue.includes("Total") || cellValue.includes("TOTAL") || 
+                        cellValue.includes("Overhead") || cellValue.includes("Profit Margin") || 
+                        cellValue.includes("Materials + Labor") || cellValue.includes("Waste")) {
+                        data.cell.styles.fontStyle = 'bold';
+                    }
+                    
+                    // Style the grand total row
+                    if (cellValue.includes("TOTAL PROJECT COST")) {
+                        data.cell.styles.fillColor = [200, 200, 200];
+                        data.cell.styles.fontStyle = 'bold';
+                    }
+                },
+                didDrawPage: function(data) {
+                    doc.setFontSize(8);
+                    doc.setTextColor(100);
+                    doc.text(`Page ${data.pageNumber}`, 
+                        doc.internal.pageSize.width - 15, 
+                        doc.internal.pageSize.height - 10);
+                },
+                margin: { top: y, left: margin, right: margin }
+            });
+
+            // Save the PDF
+            doc.save("Sanitary_Storm_Report.pdf");
+        } catch (error) {
+            alert("Error generating PDF: " + error.message);
+            console.error(error);
         }
-        
-        if (window.stormResults) {
-          const r = window.stormResults;
-          doc.setFontSize(11);
-          doc.setFont("helvetica", "bold");
-          doc.text("Storm System Summary", margin, y);
-          y += 6;
-          doc.setFont("helvetica", "normal");
-          doc.text(`Peak Runoff: ${r.flowRate.toFixed(2)} ${r.flowUnit}`, margin, y);
-          y += 5;
-          doc.text(`Drainage Area: ${r.totalArea.toFixed(1)} ${r.areaUnit}`, margin, y);
-          y += 5;
-          doc.text(`Pipe: ${r.pipeQty} sections of ${r.pipeSize}" ${r.pipeMaterial} (${r.runLength} ${r.lengthUnit})`, margin, y);
-          y += 5;
-          doc.text(`Accessories: ${r.downspouts} downspouts, ${r.catchBasins} catch basins, ${r.manholes} manholes`, margin, y);
-          y += 10;
-        }
-        
-        // Add labor summary if available
-        if (window.costResults) {
-          const r = window.costResults;
-          doc.setFontSize(11);
-          doc.setFont("helvetica", "bold");
-          doc.text("Labor Summary", margin, y);
-          y += 6;
-          doc.setFont("helvetica", "normal");
-          doc.text(`Work Duration: ${r.totalLaborDays.toFixed(1)} days (${(r.totalLaborDays/5).toFixed(1)} weeks)`, margin, y);
-          y += 5;
-          doc.text(`Labor Cost: ${formatCurrency(r.totalLaborCost)}`, margin, y);
-          y += 5;
-          doc.text(`Productivity Standard: ${r.productivityStandard === 'philippines' ? 'Philippines (Manual/Low-tech)' : r.productivityStandard === 'international' ? 'International (Mechanized/High-tech)' : 'Custom'}`, margin, y);
-          y += 10;
-        }
-        
-        // Add Bill of Quantities title
-        doc.setFontSize(14);
-        doc.setFont("helvetica", "bold");
-        doc.text("Bill of Quantities", margin, y);
-        y += 8;
-
-        // Generate table data
-        const tableData = generateBOQTableData();
-        
-        // Configure and draw the table - ONLY use body data, header is defined separately
-        doc.autoTable({
-            head: [["Description", "Quantity", "Unit", "Unit Rate", "Amount"]],
-            body: tableData,
-            startY: y,
-            theme: "grid",
-            styles: {
-                fontSize: 8,
-                cellPadding: 3,
-                valign: "middle",
-                lineColor: [0, 0, 0],
-                lineWidth: 0.1
-            },
-            columnStyles: {
-                0: { halign: "left", cellWidth: 70 },
-                1: { halign: "center", cellWidth: 25 },
-                2: { halign: "center", cellWidth: 20 },
-                3: { halign: "right", cellWidth: 30 },
-                4: { halign: "right", cellWidth: 35 }
-            },
-            headStyles: {
-                fillColor: [220, 220, 220],
-                textColor: 0,
-                fontStyle: "bold",
-                lineWidth: 0.1
-            },
-            alternateRowStyles: {
-                fillColor: [245, 245, 245]
-            },
-            didParseCell: function(data) {
-                const cellValue = (data.cell.raw || "").toString();
-                
-                // Style section headers
-                if (cellValue === "Materials" || cellValue === "Labor" || cellValue === "Summary") {
-                    data.cell.styles.fillColor = [224, 224, 224];
-                    data.cell.styles.fontStyle = 'bold';
-                    data.cell.styles.halign = 'left';
-                    data.cell.colSpan = 5;
-                }
-                
-                // Style totals and subtotals
-                if (cellValue.includes("Subtotal") || cellValue.includes("Total") || cellValue.includes("TOTAL") || 
-                    cellValue.includes("Overhead") || cellValue.includes("Profit Margin") || 
-                    cellValue.includes("Materials + Labor") || cellValue.includes("Waste")) {
-                    data.cell.styles.fontStyle = 'bold';
-                }
-                
-                // Style the grand total row
-                if (cellValue.includes("TOTAL PROJECT COST")) {
-                    data.cell.styles.fillColor = [200, 200, 200];
-                    data.cell.styles.fontStyle = 'bold';
-                }
-            },
-            didDrawPage: function(data) {
-                doc.setFontSize(8);
-                doc.setTextColor(100);
-                doc.text(`Page ${data.pageNumber}`, 
-                    doc.internal.pageSize.width - 15, 
-                    doc.internal.pageSize.height - 10);
-            },
-            margin: { top: y, left: margin, right: margin }
-        });
-
-        // Save the PDF
-        doc.save("Sanitary_Storm_Report.pdf");
-    } catch (error) {
-        alert("Error generating PDF: " + error.message);
-        console.error(error);
     }
-}
 
-    // Generate BOQ table data for PDF
-    function generateBOQTableData() {
-      const tableData = [];
-      
-      // Add Materials section
-      tableData.push(["Materials", "", "", "", ""]);
-      
-      // Add sanitary materials
-      if (window.sanitaryResults) {
-        const r = window.sanitaryResults;
-        const material = r.pipeMaterial;
-        
-        // Get material costs
-        const pipeCost = getMaterialCost(material + 'Pipe', r.pipeSize);
-        const fittingCost = parseFloat(document.getElementById('fittingCost').value);
-        const trapCost = parseFloat(document.getElementById('trapCost').value);
-        const ventCost = parseFloat(document.getElementById('ventCost').value);
-        const cleanoutCost = parseFloat(document.getElementById('cleanoutCost').value);
-        const manholeCost = parseFloat(document.getElementById('manholeCost').value);
-        
-        // Pipe
-        const pipeMaterialCost = pipeCost * r.pipeQty;
-        tableData.push([`${r.pipeSize}" ${material.toUpperCase()} Pipe`, r.pipeQty, "pcs", formatCurrency(pipeCost), formatCurrency(pipeMaterialCost)]);
-        
-        // Fittings
-        const fittingMaterialCost = fittingCost * r.fittings;
-        tableData.push(["Sanitary Fittings", r.fittings, "pcs", formatCurrency(fittingCost), formatCurrency(fittingMaterialCost)]);
-        
-        // Traps
-        const trapMaterialCost = trapCost * r.traps;
-        tableData.push(["Traps", r.traps, "pcs", formatCurrency(trapCost), formatCurrency(trapMaterialCost)]);
-        
-        // Vents
-        const ventMaterialCost = ventCost * r.vents;
-        tableData.push(["Vents", r.vents, "pcs", formatCurrency(ventCost), formatCurrency(ventMaterialCost)]);
-        
-        // Cleanouts
-        const cleanoutMaterialCost = cleanoutCost * r.cleanouts;
-        tableData.push(["Cleanouts", r.cleanouts, "pcs", formatCurrency(cleanoutCost), formatCurrency(cleanoutMaterialCost)]);
-        
-        // Manholes
-        const manholeMaterialCost = manholeCost * r.manholes;
-        tableData.push(["Manholes", r.manholes, "pcs", formatCurrency(manholeCost), formatCurrency(manholeMaterialCost)]);
-      }
-      
-      // Add storm materials
-      if (window.stormResults) {
-        const r = window.stormResults;
-        const material = r.pipeMaterial;
-        
-        // Get material costs
-        const pipeCost = getMaterialCost(material + 'Pipe', r.pipeSize);
-        const fittingCost = parseFloat(document.getElementById('fittingCost').value);
-        const downspoutCost = parseFloat(document.getElementById('downspoutCost').value);
-        const catchBasinCost = parseFloat(document.getElementById('catchBasinCost').value);
-        const manholeCost = parseFloat(document.getElementById('manholeCost').value);
-        
-        // Pipe
-        const pipeMaterialCost = pipeCost * r.pipeQty;
-        tableData.push([`${r.pipeSize}" ${material.toUpperCase()} Storm Pipe`, r.pipeQty, "pcs", formatCurrency(pipeCost), formatCurrency(pipeMaterialCost)]);
-        
-        // Fittings
-        const fittingMaterialCost = fittingCost * r.fittings;
-        tableData.push(["Storm Fittings", r.fittings, "pcs", formatCurrency(fittingCost), formatCurrency(fittingMaterialCost)]);
-        
-        // Downspouts
-        const downspoutMaterialCost = downspoutCost * r.downspouts;
-        tableData.push(["Downspouts", r.downspouts, "pcs", formatCurrency(downspoutCost), formatCurrency(downspoutMaterialCost)]);
-        
-        // Catch basins
-        const catchBasinMaterialCost = catchBasinCost * r.catchBasins;
-        tableData.push(["Catch Basins", r.catchBasins, "pcs", formatCurrency(catchBasinCost), formatCurrency(catchBasinMaterialCost)]);
-        
-        // Manholes
-        const manholeMaterialCost = manholeCost * r.manholes;
-        tableData.push(["Storm Manholes", r.manholes, "pcs", formatCurrency(manholeCost), formatCurrency(manholeMaterialCost)]);
-      }
-      
-      // Add cost summary if available
-      if (window.costResults) {
-        const r = window.costResults;
-        const wasteFactor = parseFloat(document.getElementById('wasteFactor').value) / 100;
-        const overhead = parseFloat(document.getElementById('overhead').value) / 100;
-        const profitMargin = parseFloat(document.getElementById('profitMargin').value) / 100;
-        
-        const materialWithWaste = r.totalMaterialCost + r.wasteAmount;
-        const subtotal = materialWithWaste + r.totalLaborCost;
-        
-        tableData.push(["Materials Subtotal", "", "", "", formatCurrency(r.totalMaterialCost)]);
-        tableData.push([`Waste (${(wasteFactor*100).toFixed(0)}%)`, "", "", "", formatCurrency(r.wasteAmount)]);
-        tableData.push(["Materials Total", "", "", "", formatCurrency(materialWithWaste)]);
-        tableData.push(["Labor", "", "", "", ""]);
-        tableData.push(["Plumber", r.totalLaborDays.toFixed(1), "days", formatCurrency(parseFloat(document.getElementById('plumberRate').value) * parseFloat(document.getElementById('dailyHours').value)), formatCurrency(r.totalLaborCost / 2)]);
-        tableData.push(["Helper", r.totalLaborDays.toFixed(1), "days", formatCurrency(parseFloat(document.getElementById('helperRate').value) * parseFloat(document.getElementById('dailyHours').value)), formatCurrency(r.totalLaborCost / 2)]);
-        tableData.push(["Labor Total", "", "", "", formatCurrency(r.totalLaborCost)]);
-        tableData.push(["Summary", "", "", "", ""]);
-        tableData.push(["Materials + Labor", "", "", "", formatCurrency(subtotal)]);
-        tableData.push([`Overhead (${(overhead*100).toFixed(0)}%)`, "", "", "", formatCurrency(r.overheadAmount)]);
-        tableData.push([`Profit Margin (${(profitMargin*100).toFixed(0)}%)`, "", "", "", formatCurrency(r.profitAmount)]);
-        tableData.push(["TOTAL PROJECT COST", "", "", "", formatCurrency(r.totalProjectCost)]);
-      }
-      
-      return tableData.length > 0 ? tableData : getFallbackData();
-    }
-    
-    // Fallback data
+    // Fallback data with CORRECTED spelling and structure
     function getFallbackData() {
-      return [
-        ["Materials", "", "", "", ""],
-        ["2\" PVC Pipe", "9", "pcs", "25.00", "225.00"],
-        ["Sanitary Fittings", "5", "pcs", "8.00", "40.00"],
-        ["Traps", "7", "pcs", "15.00", "105.00"],
-        ["Vents", "7", "pcs", "8.00", "56.00"],
-        ["Cleanouts", "3", "pcs", "25.00", "75.00"],
-        ["Manholes", "1", "pcs", "500.00", "500.00"],
-        ["4\" PVC Storm Pipe", "10", "pcs", "15.00", "150.00"],
-        ["Storm Fittings", "6", "pcs", "8.00", "48.00"],
-        ["Downspouts", "2", "pcs", "45.00", "90.00"],
-        ["Catch Basins", "1", "pcs", "150.00", "150.00"],
-        ["Storm Manholes", "1", "pcs", "500.00", "500.00"],
-        ["Materials Subtotal", "", "", "", "1949.00"],
-        ["Waste (5%)", "", "", "", "97.45"],
-        ["Materials Total", "", "", "", "2046.45"],
-        ["Labor", "", "", "", ""],
-        ["Plumber", "5.0", "days", "640.00", "3200.00"],
-        ["Helper", "5.0", "days", "400.00", "2000.00"],
-        ["Labor Total", "", "", "", "5200.00"],
-        ["Summary", "", "", "", ""],
-        ["Materials + Labor", "", "", "", "7246.45"],
-        ["Overhead (15%)", "", "", "", "1086.97"],
-        ["Profit Margin (10%)", "", "", "", "833.34"],
-        ["TOTAL PROJECT COST", "", "", "", "9166.76"]
-      ];
+        return [
+            ["Materials", "", "", "", ""],
+            ["2\" PVC Pipe", "9", "pcs", "25.00", "225.00"],
+            ["Sanitary Fittings", "5", "pcs", "8.00", "40.00"],
+            ["Traps", "7", "pcs", "15.00", "105.00"],
+            ["Vents", "7", "pcs", "8.00", "56.00"],
+            ["Cleanouts", "3", "pcs", "25.00", "75.00"],
+            ["Manholes", "1", "pcs", "500.00", "500.00"],
+            ["4\" PVC Storm Pipe", "10", "pcs", "15.00", "150.00"],
+            ["Storm Fittings", "6", "pcs", "8.00", "48.00"],
+            ["Downspouts", "2", "pcs", "45.00", "90.00"],
+            ["Catch Basins", "1", "pcs", "150.00", "150.00"],
+            ["Storm Manholes", "1", "pcs", "500.00", "500.00"],
+            ["Materials Subtotal", "", "", "", "1949.00"],
+            ["Waste (5%)", "", "", "", "97.45"],
+            ["Materials Total", "", "", "", "2046.45"],
+            ["Labor", "", "", "", ""],
+            ["Plumber", "5.0", "days", "640.00", "3200.00"],
+            ["Helper", "5.0", "days", "400.00", "2000.00"],
+            ["Labor Total", "", "", "", "5200.00"],
+            ["Summary", "", "", "", ""],
+            ["Materials + Labor", "", "", "", "7246.45"],
+            ["Overhead (15%)", "", "", "", "1086.97"],
+            ["Profit Margin (10%)", "", "", "", "833.34"],
+            ["TOTAL PROJECT COST", "", "", "", "9166.76"]
+        ];
     }
     
     // Export to Excel
