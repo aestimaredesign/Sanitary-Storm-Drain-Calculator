@@ -301,6 +301,36 @@
     .productivity-table th {
       background-color: #f1f5f9;
     }
+    
+    .pipe-size-group {
+      display: none;
+      margin-left: 20px;
+      border-left: 2px solid #ddd;
+      padding-left: 15px;
+    }
+    
+    .pipe-size-group.active {
+      display: block;
+    }
+    
+    .material-type {
+      margin-bottom: 15px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid #eee;
+    }
+    
+    .material-type h4 {
+      margin: 0 0 10px 0;
+      color: var(--primary);
+    }
+    
+    .section-header {
+      background-color: #e9ecef;
+      padding: 8px 15px;
+      margin: 15px 0 10px 0;
+      border-radius: 4px;
+      font-weight: bold;
+    }
   </style>
 </head>
 <body>
@@ -549,102 +579,123 @@
         
         <div class="material-costs">
           <h3>Material Costs</h3>
-          <div class="form-row">
-            <label for="pvcPipeCost2">PVC Pipe 2" Cost (per section):</label>
-            <input type="number" id="pvcPipeCost2" value="25" min="0" step="0.01">
+          
+          <div class="material-type">
+            <h4>PVC Pipe</h4>
+            <div class="form-row">
+              <label for="pvcPipeSize">Select Size:</label>
+              <select id="pvcPipeSize" onchange="showPipeSizeInputs('pvc')">
+                <option value="2">2"</option>
+                <option value="3">3"</option>
+                <option value="4">4"</option>
+                <option value="6">6"</option>
+              </select>
+            </div>
+            <div id="pvcPipeInputs" class="pipe-size-group active">
+              <div class="form-row">
+                <label for="pvcPipeCost2">Cost per section:</label>
+                <input type="number" id="pvcPipeCost2" value="25" min="0" step="0.01">
+              </div>
+            </div>
           </div>
-          <div class="form-row">
-            <label for="pvcPipeCost3">PVC Pipe 3" Cost (per section):</label>
-            <input type="number" id="pvcPipeCost3" value="35" min="0" step="0.01">
+          
+          <div class="material-type">
+            <h4>Cast Iron Pipe</h4>
+            <div class="form-row">
+              <label for="castIronPipeSize">Select Size:</label>
+              <select id="castIronPipeSize" onchange="showPipeSizeInputs('castIron')">
+                <option value="2">2"</option>
+                <option value="3">3"</option>
+                <option value="4">4"</option>
+                <option value="6">6"</option>
+              </select>
+            </div>
+            <div id="castIronPipeInputs" class="pipe-size-group">
+              <div class="form-row">
+                <label for="castIronPipeCost2">Cost per section:</label>
+                <input type="number" id="castIronPipeCost2" value="65" min="0" step="0.01">
+              </div>
+            </div>
           </div>
-          <div class="form-row">
-            <label for="pvcPipeCost4">PVC Pipe 4" Cost (per section):</label>
-            <input type="number" id="pvcPipeCost4" value="50" min="0" step="0.01">
+          
+          <div class="material-type">
+            <h4>HDPE Pipe</h4>
+            <div class="form-row">
+              <label for="hdpPipeSize">Select Size:</label>
+              <select id="hdpPipeSize" onchange="showPipeSizeInputs('hdp')">
+                <option value="2">2"</option>
+                <option value="3">3"</option>
+                <option value="4">4"</option>
+                <option value="6">6"</option>
+              </select>
+            </div>
+            <div id="hdpPipeInputs" class="pipe-size-group">
+              <div class="form-row">
+                <label for="hdpPipeCost2">Cost per section:</label>
+                <input type="number" id="hdpPipeCost2" value="32" min="0" step="0.01">
+              </div>
+            </div>
           </div>
-          <div class="form-row">
-            <label for="pvcPipeCost6">PVC Pipe 6" Cost (per section):</label>
-            <input type="number" id="pvcPipeCost6" value="85" min="0" step="0.01">
+          
+          <div class="material-type">
+            <h4>ABS Pipe</h4>
+            <div class="form-row">
+              <label for="absPipeSize">Select Size:</label>
+              <select id="absPipeSize" onchange="showPipeSizeInputs('abs')">
+                <option value="2">2"</option>
+                <option value="3">3"</option>
+                <option value="4">4"</option>
+                <option value="6">6"</option>
+              </select>
+            </div>
+            <div id="absPipeInputs" class="pipe-size-group">
+              <div class="form-row">
+                <label for="absPipeCost2">Cost per section:</label>
+                <input type="number" id="absPipeCost2" value="28" min="0" step="0.01">
+              </div>
+            </div>
           </div>
-          <div class="form-row">
-            <label for="castIronPipeCost2">Cast Iron Pipe 2" Cost (per section):</label>
-            <input type="number" id="castIronPipeCost2" value="65" min="0" step="0.01">
+          
+          <div class="material-type">
+            <h4>Corrugated HDPE</h4>
+            <div class="form-row">
+              <label for="corrugatedPipeSize">Select Size:</label>
+              <select id="corrugatedPipeSize" onchange="showPipeSizeInputs('corrugated')">
+                <option value="4">4"</option>
+                <option value="6">6"</option>
+                <option value="8">8"</option>
+                <option value="10">10"</option>
+              </select>
+            </div>
+            <div id="corrugatedPipeInputs" class="pipe-size-group">
+              <div class="form-row">
+                <label for="corrugatedPipeCost4">Cost per section:</label>
+                <input type="number" id="corrugatedPipeCost4" value="15" min="0" step="0.01">
+              </div>
+            </div>
           </div>
-          <div class="form-row">
-            <label for="castIronPipeCost3">Cast Iron Pipe 3" Cost (per section):</label>
-            <input type="number" id="castIronPipeCost3" value="95" min="0" step="0.01">
+          
+          <div class="material-type">
+            <h4>Concrete Pipe</h4>
+            <div class="form-row">
+              <label for="concretePipeSize">Select Size:</label>
+              <select id="concretePipeSize" onchange="showPipeSizeInputs('concrete')">
+                <option value="4">4"</option>
+                <option value="6">6"</option>
+                <option value="8">8"</option>
+                <option value="10">10"</option>
+              </select>
+            </div>
+            <div id="concretePipeInputs" class="pipe-size-group">
+              <div class="form-row">
+                <label for="concretePipeCost4">Cost per section:</label>
+                <input type="number" id="concretePipeCost4" value="55" min="0" step="0.01">
+              </div>
+            </div>
           </div>
-          <div class="form-row">
-            <label for="castIronPipeCost4">Cast Iron Pipe 4" Cost (per section):</label>
-            <input type="number" id="castIronPipeCost4" value="130" min="0" step="0.01">
-          </div>
-          <div class="form-row">
-            <label for="castIronPipeCost6">Cast Iron Pipe 6" Cost (per section):</label>
-            <input type="number" id="castIronPipeCost6" value="200" min="0" step="0.01">
-          </div>
-          <div class="form-row">
-            <label for="hdpPipeCost2">HDPE Pipe 2" Cost (per section):</label>
-            <input type="number" id="hdpPipeCost2" value="32" min="0" step="0.01">
-          </div>
-          <div class="form-row">
-            <label for="hdpPipeCost3">HDPE Pipe 3" Cost (per section):</label>
-            <input type="number" id="hdpPipeCost3" value="45" min="0" step="0.01">
-          </div>
-          <div class="form-row">
-            <label for="hdpPipeCost4">HDPE Pipe 4" Cost (per section):</label>
-            <input type="number" id="hdpPipeCost4" value="65" min="0" step="0.01">
-          </div>
-          <div class="form-row">
-            <label for="hdpPipeCost6">HDPE Pipe 6" Cost (per section):</label>
-            <input type="number" id="hdpPipeCost6" value="110" min="0" step="0.01">
-          </div>
-          <div class="form-row">
-            <label for="absPipeCost2">ABS Pipe 2" Cost (per section):</label>
-            <input type="number" id="absPipeCost2" value="28" min="0" step="0.01">
-          </div>
-          <div class="form-row">
-            <label for="absPipeCost3">ABS Pipe 3" Cost (per section):</label>
-            <input type="number" id="absPipeCost3" value="40" min="0" step="0.01">
-          </div>
-          <div class="form-row">
-            <label for="absPipeCost4">ABS Pipe 4" Cost (per section):</label>
-            <input type="number" id="absPipeCost4" value="55" min="0" step="0.01">
-          </div>
-          <div class="form-row">
-            <label for="absPipeCost6">ABS Pipe 6" Cost (per section):</label>
-            <input type="number" id="absPipeCost6" value="90" min="0" step="0.01">
-          </div>
-          <div class="form-row">
-            <label for="corrugatedPipeCost4">Corrugated HDPE 4" Cost (per section):</label>
-            <input type="number" id="corrugatedPipeCost4" value="15" min="0" step="0.01">
-          </div>
-          <div class="form-row">
-            <label for="corrugatedPipeCost6">Corrugated HDPE 6" Cost (per section):</label>
-            <input type="number" id="corrugatedPipeCost6" value="25" min="0" step="0.01">
-          </div>
-          <div class="form-row">
-            <label for="corrugatedPipeCost8">Corrugated HDPE 8" Cost (per section):</label>
-            <input type="number" id="corrugatedPipeCost8" value="40" min="0" step="0.01">
-          </div>
-          <div class="form-row">
-            <label for="corrugatedPipeCost10">Corrugated HDPE 10" Cost (per section):</label>
-            <input type="number" id="corrugatedPipeCost10" value="60" min="0" step="0.01">
-          </div>
-          <div class="form-row">
-            <label for="concretePipeCost4">Concrete Pipe 4" Cost (per section):</label>
-            <input type="number" id="concretePipeCost4" value="55" min="0" step="0.01">
-          </div>
-          <div class="form-row">
-            <label for="concretePipeCost6">Concrete Pipe 6" Cost (per section):</label>
-            <input type="number" id="concretePipeCost6" value="85" min="0" step="0.01">
-          </div>
-          <div class="form-row">
-            <label for="concretePipeCost8">Concrete Pipe 8" Cost (per section):</label>
-            <input type="number" id="concretePipeCost8" value="120" min="0" step="0.01">
-          </div>
-          <div class="form-row">
-            <label for="concretePipeCost10">Concrete Pipe 10" Cost (per section):</label>
-            <input type="number" id="concretePipeCost10" value="180" min="0" step="0.01">
-          </div>
+          
+          <div class="section-header">Accessories</div>
+          
           <div class="form-row">
             <label for="trapCost">Trap Cost (each):</label>
             <input type="number" id="trapCost" value="15" min="0" step="0.01">
@@ -798,13 +849,11 @@
           <div id="costSummary">Calculate costs first</div>
           <table class="cost-breakdown" id="costTable">
             <tr>
-              <th>Item</th>
+              <th>Description</th>
               <th>Quantity</th>
-              <th>Unit Cost</th>
-              <th>Material Cost</th>
-              <th>Labor Days</th>
-              <th>Labor Cost</th>
-              <th>Total Cost</th>
+              <th>Unit</th>
+              <th>Unit Rate</th>
+              <th>Amount</th>
             </tr>
           </table>
         </div>
@@ -812,7 +861,6 @@
         <div class="export-section">
           <button onclick="exportToPDF()">Export to PDF</button>
           <button onclick="exportToExcel()">Export to Excel</button>
-          <button class="secondary" onclick="generateDetailedReport()">Generate Detailed Report</button>
         </div>
       </div>
     </div>
@@ -890,7 +938,36 @@
           customRatesDiv.style.display = 'none';
         }
       });
+      
+      // Add event listeners to cost inputs for auto-calculation
+      const costInputs = document.querySelectorAll('.material-costs input, .labor-inputs input');
+      costInputs.forEach(input => {
+        input.addEventListener('change', calculateCosts);
+      });
+      
+      // Initialize pipe size inputs
+      showPipeSizeInputs('pvc');
     });
+    
+    // Show pipe size inputs based on selected size
+    function showPipeSizeInputs(materialType) {
+      // Hide all pipe size inputs
+      document.querySelectorAll('.pipe-size-group').forEach(group => {
+        group.classList.remove('active');
+      });
+      
+      // Show selected pipe size inputs
+      const sizeSelect = document.getElementById(materialType + 'PipeSize');
+      const selectedSize = sizeSelect.value;
+      const inputsGroup = document.getElementById(materialType + 'PipeInputs');
+      
+      // Update the input label and ID based on selected size
+      const input = inputsGroup.querySelector('input');
+      input.id = materialType + 'PipeCost' + selectedSize;
+      input.previousElementSibling.textContent = `Cost per section (${selectedSize}"):`;
+      
+      inputsGroup.classList.add('active');
+    }
     
     // Tab switching function
     function switchTab(tabName) {
@@ -909,6 +986,11 @@
       
       // Add active class to clicked tab
       event.target.classList.add('active');
+      
+      // Auto-calculate costs when switching to summary tab
+      if (tabName === 'summary') {
+        calculateCosts();
+      }
     }
     
     // Unit conversion based on selection
@@ -1170,7 +1252,7 @@
     function getMaterialCost(materialType, size) {
       // For pipe materials, we need both material type and size
       if (materialType.includes('Pipe')) {
-        const costElement = document.getElementById(materialType.toLowerCase() + 'Cost' + size);
+        const costElement = document.getElementById(materialType.toLowerCase() + 'PipeCost' + size);
         return costElement ? parseFloat(costElement.value) : getDefaultPipeCost(materialType, size);
       }
       
@@ -1237,6 +1319,9 @@
         productivity = productivityRates[productivityStandard];
       }
       
+      // Add section header for Materials
+      addCostRow("Materials", "", "", "", "", true);
+      
       // Add sanitary system costs if calculated
       if (window.sanitaryResults) {
         const r = window.sanitaryResults;
@@ -1256,7 +1341,7 @@
         const pipeLaborDays = r.runLength / pipeProductivity;
         const pipeLaborCost = pipeLaborDays * (plumberRate + helperRate * 2) * dailyHours;
         
-        addCostRow('Sanitary Pipe', r.pipeQty, formatCurrency(pipeCost), formatCurrency(pipeMaterialCost), pipeLaborDays.toFixed(1), formatCurrency(pipeLaborCost));
+        addCostRow(`${r.pipeSize}" ${material.toUpperCase()} Pipe`, r.pipeQty, "pcs", formatCurrency(pipeCost), formatCurrency(pipeMaterialCost));
         totalMaterialCost += pipeMaterialCost;
         totalLaborDays += pipeLaborDays;
         totalLaborCost += pipeLaborCost;
@@ -1266,7 +1351,7 @@
         const fittingLaborDays = r.fittings / productivity.fitting;
         const fittingLaborCost = fittingLaborDays * (plumberRate + helperRate) * dailyHours;
         
-        addCostRow('Sanitary Fittings', r.fittings, formatCurrency(fittingCost), formatCurrency(fittingMaterialCost), fittingLaborDays.toFixed(1), formatCurrency(fittingLaborCost));
+        addCostRow('Sanitary Fittings', r.fittings, "pcs", formatCurrency(fittingCost), formatCurrency(fittingMaterialCost));
         totalMaterialCost += fittingMaterialCost;
         totalLaborDays += fittingLaborDays;
         totalLaborCost += fittingLaborCost;
@@ -1276,7 +1361,7 @@
         const trapLaborDays = r.traps / productivity.trap;
         const trapLaborCost = trapLaborDays * (plumberRate + helperRate) * dailyHours;
         
-        addCostRow('Traps', r.traps, formatCurrency(trapCost), formatCurrency(trapMaterialCost), trapLaborDays.toFixed(1), formatCurrency(trapLaborCost));
+        addCostRow('Traps', r.traps, "pcs", formatCurrency(trapCost), formatCurrency(trapMaterialCost));
         totalMaterialCost += trapMaterialCost;
         totalLaborDays += trapLaborDays;
         totalLaborCost += trapLaborCost;
@@ -1286,7 +1371,7 @@
         const ventLaborDays = r.vents / productivity.vent;
         const ventLaborCost = ventLaborDays * (plumberRate + helperRate) * dailyHours;
         
-        addCostRow('Vents', r.vents, formatCurrency(ventCost), formatCurrency(ventMaterialCost), ventLaborDays.toFixed(1), formatCurrency(ventLaborCost));
+        addCostRow('Vents', r.vents, "pcs", formatCurrency(ventCost), formatCurrency(ventMaterialCost));
         totalMaterialCost += ventMaterialCost;
         totalLaborDays += ventLaborDays;
         totalLaborCost += ventLaborCost;
@@ -1296,7 +1381,7 @@
         const cleanoutLaborDays = r.cleanouts / productivity.cleanout;
         const cleanoutLaborCost = cleanoutLaborDays * (plumberRate + helperRate) * dailyHours;
         
-        addCostRow('Cleanouts', r.cleanouts, formatCurrency(cleanoutCost), formatCurrency(cleanoutMaterialCost), cleanoutLaborDays.toFixed(1), formatCurrency(cleanoutLaborCost));
+        addCostRow('Cleanouts', r.cleanouts, "pcs", formatCurrency(cleanoutCost), formatCurrency(cleanoutMaterialCost));
         totalMaterialCost += cleanoutMaterialCost;
         totalLaborDays += cleanoutLaborDays;
         totalLaborCost += cleanoutLaborCost;
@@ -1306,7 +1391,7 @@
         const manholeLaborDays = r.manholes / productivity.manhole;
         const manholeLaborCost = manholeLaborDays * (plumberRate + helperRate * 2) * dailyHours;
         
-        addCostRow('Manholes', r.manholes, formatCurrency(manholeCost), formatCurrency(manholeMaterialCost), manholeLaborDays.toFixed(1), formatCurrency(manholeLaborCost));
+        addCostRow('Manholes', r.manholes, "pcs", formatCurrency(manholeCost), formatCurrency(manholeMaterialCost));
         totalMaterialCost += manholeMaterialCost;
         totalLaborDays += manholeLaborDays;
         totalLaborCost += manholeLaborCost;
@@ -1330,7 +1415,7 @@
         const pipeLaborDays = r.runLength / pipeProductivity;
         const pipeLaborCost = pipeLaborDays * (plumberRate + helperRate * 2) * dailyHours;
         
-        addCostRow('Storm Pipe', r.pipeQty, formatCurrency(pipeCost), formatCurrency(pipeMaterialCost), pipeLaborDays.toFixed(1), formatCurrency(pipeLaborCost));
+        addCostRow(`${r.pipeSize}" ${material.toUpperCase()} Storm Pipe`, r.pipeQty, "pcs", formatCurrency(pipeCost), formatCurrency(pipeMaterialCost));
         totalMaterialCost += pipeMaterialCost;
         totalLaborDays += pipeLaborDays;
         totalLaborCost += pipeLaborCost;
@@ -1340,7 +1425,7 @@
         const fittingLaborDays = r.fittings / productivity.fitting;
         const fittingLaborCost = fittingLaborDays * (plumberRate + helperRate) * dailyHours;
         
-        addCostRow('Storm Fittings', r.fittings, formatCurrency(fittingCost), formatCurrency(fittingMaterialCost), fittingLaborDays.toFixed(1), formatCurrency(fittingLaborCost));
+        addCostRow('Storm Fittings', r.fittings, "pcs", formatCurrency(fittingCost), formatCurrency(fittingMaterialCost));
         totalMaterialCost += fittingMaterialCost;
         totalLaborDays += fittingLaborDays;
         totalLaborCost += fittingLaborCost;
@@ -1350,7 +1435,7 @@
         const downspoutLaborDays = r.downspouts / productivity.downspout;
         const downspoutLaborCost = downspoutLaborDays * (plumberRate + helperRate) * dailyHours;
         
-        addCostRow('Downspouts', r.downspouts, formatCurrency(downspoutCost), formatCurrency(downspoutMaterialCost), downspoutLaborDays.toFixed(1), formatCurrency(downspoutLaborCost));
+        addCostRow('Downspouts', r.downspouts, "pcs", formatCurrency(downspoutCost), formatCurrency(downspoutMaterialCost));
         totalMaterialCost += downspoutMaterialCost;
         totalLaborDays += downspoutLaborDays;
         totalLaborCost += downspoutLaborCost;
@@ -1360,7 +1445,7 @@
         const catchBasinLaborDays = r.catchBasins / productivity.catchBasin;
         const catchBasinLaborCost = catchBasinLaborDays * (plumberRate + helperRate * 2) * dailyHours;
         
-        addCostRow('Catch Basins', r.catchBasins, formatCurrency(catchBasinCost), formatCurrency(catchBasinMaterialCost), catchBasinLaborDays.toFixed(1), formatCurrency(catchBasinLaborCost));
+        addCostRow('Catch Basins', r.catchBasins, "pcs", formatCurrency(catchBasinCost), formatCurrency(catchBasinMaterialCost));
         totalMaterialCost += catchBasinMaterialCost;
         totalLaborDays += catchBasinLaborDays;
         totalLaborCost += catchBasinLaborCost;
@@ -1370,15 +1455,38 @@
         const manholeLaborDays = r.manholes / productivity.manhole;
         const manholeLaborCost = manholeLaborDays * (plumberRate + helperRate * 2) * dailyHours;
         
-        addCostRow('Storm Manholes', r.manholes, formatCurrency(manholeCost), formatCurrency(manholeMaterialCost), manholeLaborDays.toFixed(1), formatCurrency(manholeLaborCost));
+        addCostRow('Storm Manholes', r.manholes, "pcs", formatCurrency(manholeCost), formatCurrency(manholeMaterialCost));
         totalMaterialCost += manholeMaterialCost;
         totalLaborDays += manholeLaborDays;
         totalLaborCost += manholeLaborCost;
       }
       
+      // Add Materials Subtotal
+      addCostRow("Materials Subtotal", "", "", "", formatCurrency(totalMaterialCost));
+      
       // Apply waste factor to materials
       const wasteAmount = totalMaterialCost * wasteFactor;
       const materialWithWaste = totalMaterialCost + wasteAmount;
+      
+      addCostRow(`Waste (${(wasteFactor*100).toFixed(0)}%)`, "", "", "", formatCurrency(wasteAmount));
+      addCostRow("Materials Total", "", "", "", formatCurrency(materialWithWaste));
+      
+      // Add section header for Labor
+      addCostRow("Labor", "", "", "", "", true);
+      
+      // Calculate labor costs based on productivity
+      const plumberLaborDays = totalLaborDays;
+      const helperLaborDays = totalLaborDays;
+      
+      const plumberLaborCost = plumberLaborDays * plumberRate * dailyHours;
+      const helperLaborCost = helperLaborDays * helperRate * dailyHours;
+      
+      addCostRow("Plumber", plumberLaborDays.toFixed(1), "days", formatCurrency(plumberRate * dailyHours), formatCurrency(plumberLaborCost));
+      addCostRow("Helper", helperLaborDays.toFixed(1), "days", formatCurrency(helperRate * dailyHours), formatCurrency(helperLaborCost));
+      
+      totalLaborCost = plumberLaborCost + helperLaborCost;
+      
+      addCostRow("Labor Total", "", "", "", formatCurrency(totalLaborCost));
       
       // Calculate overhead and profit
       const subtotal = materialWithWaste + totalLaborCost;
@@ -1387,26 +1495,16 @@
       
       const totalProjectCost = subtotal + overheadAmount + profitAmount;
       
+      // Add section header for Summary
+      addCostRow("Summary", "", "", "", "", true);
+      
       // Add summary rows
-      addCostRow('Materials Subtotal', '', '', formatCurrency(totalMaterialCost), '', '');
-      addCostRow(`Waste (${(wasteFactor*100).toFixed(0)}%)`, '', '', formatCurrency(wasteAmount), '', '');
-      addCostRow('Materials Total', '', '', formatCurrency(materialWithWaste), '', '');
-      addCostRow('Labor Total', '', '', '', totalLaborDays.toFixed(1), formatCurrency(totalLaborCost));
-      addCostRow('Subtotal (Materials + Labor)', '', '', formatCurrency(subtotal), '', '');
-      addCostRow(`Overhead (${(overhead*100).toFixed(0)}%)`, '', '', formatCurrency(overheadAmount), '', '');
-      addCostRow(`Profit Margin (${(profitMargin*100).toFixed(0)}%)`, '', '', formatCurrency(profitAmount), '', '');
+      addCostRow("Materials + Labor", "", "", "", formatCurrency(subtotal));
+      addCostRow(`Overhead (${(overhead*100).toFixed(0)}%)`, "", "", "", formatCurrency(overheadAmount));
+      addCostRow(`Profit Margin (${(profitMargin*100).toFixed(0)}%)`, "", "", "", formatCurrency(profitAmount));
       
       // Add total row
-      const totalRow = costTable.insertRow();
-      totalRow.innerHTML = `
-        <td><strong>TOTAL PROJECT COST</strong></td>
-        <td></td>
-        <td></td>
-        <td></td>
-        <td></td>
-        <td></td>
-        <td><strong>${formatCurrency(totalProjectCost)}</strong></td>
-      `;
+      addCostRow("TOTAL PROJECT COST", "", "", "", formatCurrency(totalProjectCost), false, true);
       
       // Update cost summary
       document.getElementById('costSummary').innerHTML = `
@@ -1431,18 +1529,31 @@
     }
     
     // Helper function to add a row to the cost table
-    function addCostRow(item, quantity, unitCost, materialCost, laborDays, laborCost) {
+    function addCostRow(description, quantity, unit, unitRate, amount, isSectionHeader = false, isTotal = false) {
       const costTable = document.getElementById('costTable');
       const row = costTable.insertRow();
-      row.innerHTML = `
-        <td>${item}</td>
-        <td>${quantity}</td>
-        <td>${unitCost}</td>
-        <td>${materialCost}</td>
-        <td>${laborDays}</td>
-        <td>${laborCost}</td>
-        <td>${materialCost && laborCost ? formatCurrency(parseFloat(materialCost.replace(/[^0-9.-]+/g,"")) + parseFloat(laborCost.replace(/[^0-9.-]+/g,""))) : (materialCost || laborCost || '')}</td>
-      `;
+      
+      if (isSectionHeader) {
+        row.innerHTML = `
+          <td colspan="5" style="background-color: #e9ecef; font-weight: bold;">${description}</td>
+        `;
+      } else if (isTotal) {
+        row.innerHTML = `
+          <td style="font-weight: bold;">${description}</td>
+          <td></td>
+          <td></td>
+          <td></td>
+          <td style="font-weight: bold;">${amount}</td>
+        `;
+      } else {
+        row.innerHTML = `
+          <td>${description}</td>
+          <td>${quantity}</td>
+          <td>${unit}</td>
+          <td>${unitRate}</td>
+          <td>${amount}</td>
+        `;
+      }
     }
     
     // Format currency based on selection
@@ -1742,10 +1853,11 @@
     function generateBOQTableData() {
       const tableData = [];
       
+      // Add Materials section
+      tableData.push(["Materials", "", "", "", ""]);
+      
       // Add sanitary materials
       if (window.sanitaryResults) {
-        tableData.push(["Materials", "", "", "", ""]);
-        
         const r = window.sanitaryResults;
         const material = r.pipeMaterial;
         
@@ -1759,7 +1871,7 @@
         
         // Pipe
         const pipeMaterialCost = pipeCost * r.pipeQty;
-        tableData.push(["Sanitary Pipe", r.pipeQty, "pcs", formatCurrency(pipeCost), formatCurrency(pipeMaterialCost)]);
+        tableData.push([`${r.pipeSize}" ${material.toUpperCase()} Pipe`, r.pipeQty, "pcs", formatCurrency(pipeCost), formatCurrency(pipeMaterialCost)]);
         
         // Fittings
         const fittingMaterialCost = fittingCost * r.fittings;
@@ -1796,7 +1908,7 @@
         
         // Pipe
         const pipeMaterialCost = pipeCost * r.pipeQty;
-        tableData.push(["Storm Pipe", r.pipeQty, "pcs", formatCurrency(pipeCost), formatCurrency(pipeMaterialCost)]);
+        tableData.push([`${r.pipeSize}" ${material.toUpperCase()} Storm Pipe`, r.pipeQty, "pcs", formatCurrency(pipeCost), formatCurrency(pipeMaterialCost)]);
         
         // Fittings
         const fittingMaterialCost = fittingCost * r.fittings;
@@ -1829,7 +1941,9 @@
         tableData.push([`Waste (${(wasteFactor*100).toFixed(0)}%)`, "", "", "", formatCurrency(r.wasteAmount)]);
         tableData.push(["Materials Total", "", "", "", formatCurrency(materialWithWaste)]);
         tableData.push(["Labor", "", "", "", ""]);
-        tableData.push(["Labor Cost", "", "", "", formatCurrency(r.totalLaborCost)]);
+        tableData.push(["Plumber", r.totalLaborDays.toFixed(1), "days", formatCurrency(parseFloat(document.getElementById('plumberRate').value) * parseFloat(document.getElementById('dailyHours').value)), formatCurrency(r.totalLaborCost / 2)]);
+        tableData.push(["Helper", r.totalLaborDays.toFixed(1), "days", formatCurrency(parseFloat(document.getElementById('helperRate').value) * parseFloat(document.getElementById('dailyHours').value)), formatCurrency(r.totalLaborCost / 2)]);
+        tableData.push(["Labor Total", "", "", "", formatCurrency(r.totalLaborCost)]);
         tableData.push(["Summary", "", "", "", ""]);
         tableData.push(["Materials + Labor", "", "", "", formatCurrency(subtotal)]);
         tableData.push([`Overhead (${(overhead*100).toFixed(0)}%)`, "", "", "", formatCurrency(r.overheadAmount)]);
@@ -1844,13 +1958,13 @@
     function getFallbackData() {
       return [
         ["Materials", "", "", "", ""],
-        ["Sanitary Pipe", "9", "pcs", "25.00", "225.00"],
+        ["2\" PVC Pipe", "9", "pcs", "25.00", "225.00"],
         ["Sanitary Fittings", "5", "pcs", "8.00", "40.00"],
         ["Traps", "7", "pcs", "15.00", "105.00"],
         ["Vents", "7", "pcs", "8.00", "56.00"],
         ["Cleanouts", "3", "pcs", "25.00", "75.00"],
         ["Manholes", "1", "pcs", "500.00", "500.00"],
-        ["Storm Pipe", "10", "pcs", "15.00", "150.00"],
+        ["4\" PVC Storm Pipe", "10", "pcs", "15.00", "150.00"],
         ["Storm Fittings", "6", "pcs", "8.00", "48.00"],
         ["Downspouts", "2", "pcs", "45.00", "90.00"],
         ["Catch Basins", "1", "pcs", "150.00", "150.00"],
@@ -1859,12 +1973,14 @@
         ["Waste (5%)", "", "", "", "97.45"],
         ["Materials Total", "", "", "", "2046.45"],
         ["Labor", "", "", "", ""],
-        ["Labor Cost", "", "", "", "4000.00"],
+        ["Plumber", "5.0", "days", "640.00", "3200.00"],
+        ["Helper", "5.0", "days", "400.00", "2000.00"],
+        ["Labor Total", "", "", "", "5200.00"],
         ["Summary", "", "", "", ""],
-        ["Materials + Labor", "", "", "", "6046.45"],
-        ["Overhead (15%)", "", "", "", "906.97"],
-        ["Profit Margin (10%)", "", "", "", "695.34"],
-        ["TOTAL PROJECT COST", "", "", "", "7648.76"]
+        ["Materials + Labor", "", "", "", "7246.45"],
+        ["Overhead (15%)", "", "", "", "1086.97"],
+        ["Profit Margin (10%)", "", "", "", "833.34"],
+        ["TOTAL PROJECT COST", "", "", "", "9166.76"]
       ];
     }
     
@@ -1938,122 +2054,6 @@
       
       // Save the Excel file
       XLSX.writeFile(wb, `${document.getElementById('projectName').value}_Report.xlsx`);
-    }
-    
-    // Generate detailed report
-    function generateDetailedReport() {
-      // Create a comprehensive report with calculations and analysis
-      const reportWindow = window.open('', '_blank');
-      const projectName = document.getElementById('projectName').value || 'Sanitary & Storm Project';
-      
-      reportWindow.document.write(`
-        <html>
-          <head>
-            <title>Detailed Report - ${projectName}</title>
-            <style>
-              body { font-family: Arial, sans-serif; margin: 20px; line-height: 1.6; }
-              h1, h2, h3 { color: #2563eb; }
-              .section { margin-bottom: 30px; padding: 15px; border: 1px solid #ddd; border-radius: 5px; }
-              table { width: 100%; border-collapse: collapse; margin: 10px 0; }
-              th, td { padding: 8px 12px; text-align: left; border-bottom: 1px solid #ddd; }
-              th { background-color: #f1f5f9; }
-              .calculation { background-color: #f8fafc; padding: 10px; border-radius: 4px; margin: 10px 0; }
-            </style>
-          </head>
-          <body>
-            <h1>Detailed Sanitary & Storm Drain Analysis</h1>
-            <p><strong>Project:</strong> ${projectName}</p>
-            <p><strong>Date:</strong> ${new Date().toLocaleDateString()}</p>
-            
-            ${window.sanitaryResults ? `
-            <div class="section">
-              <h2>Sanitary System Analysis</h2>
-              <h3>Hydraulic Calculations</h3>
-              <div class="calculation">
-                <p><strong>Total DFU:</strong> ${window.sanitaryResults.totalDFU}</p>
-                <p><strong>Peak Flow:</strong> ${window.sanitaryResults.flowRate.toFixed(2)} ${window.sanitaryResults.flowUnit}</p>
-                <p><strong>Pipe Sizing:</strong> Based on ${window.sanitaryResults.totalDFU} DFU at ${document.getElementById('sanSlope').value}% slope</p>
-                <p><strong>Recommended Pipe:</strong> ${window.sanitaryResults.pipeSize}" ${window.sanitaryResults.pipeMaterial}</p>
-              </div>
-              
-              <h3>Material Quantities</h3>
-              <table>
-                <tr><th>Item</th><th>Quantity</th><th>Unit</th></tr>
-                <tr><td>Pipe</td><td>${window.sanitaryResults.pipeQty}</td><td>sections</td></tr>
-                <tr><td>Traps</td><td>${window.sanitaryResults.traps}</td><td>pcs</td></tr>
-                <tr><td>Vents</td><td>${window.sanitaryResults.vents}</td><td>pcs</td></tr>
-                <tr><td>Cleanouts</td><td>${window.sanitaryResults.cleanouts}</td><td>pcs</td></tr>
-                <tr><td>Manholes</td><td>${window.sanitaryResults.manholes}</td><td>pcs</td></tr>
-                <tr><td>Fittings</td><td>${window.sanitaryResults.fittings}</td><td>pcs</td></tr>
-              </table>
-            </div>
-            ` : ''}
-            
-            ${window.stormResults ? `
-            <div class="section">
-              <h2>Storm System Analysis</h2>
-              <h3>Hydraulic Calculations</h3>
-              <div class="calculation">
-                <p><strong>Drainage Area:</strong> ${window.stormResults.totalArea.toFixed(1)} ${window.stormResults.areaUnit}</p>
-                <p><strong>Runoff Coefficient:</strong> ${document.getElementById('coef').value}</p>
-                <p><strong>Rainfall Intensity:</strong> ${document.getElementById('intensity').value} ${document.getElementById('units').value === 'metric' ? 'mm/hr' : 'in/hr'}</p>
-                <p><strong>Peak Runoff:</strong> ${window.stormResults.flowRate.toFixed(2)} ${window.stormResults.flowUnit}</p>
-                <p><strong>Recommended Pipe:</strong> ${window.stormResults.pipeSize}" ${window.stormResults.pipeMaterial}</p>
-              </div>
-              
-              <h3>Material Quantities</h3>
-              <table>
-                <tr><th>Item</th><th>Quantity</th><th>Unit</th></tr>
-                <tr><td>Pipe</td><td>${window.stormResults.pipeQty}</td><td>sections</td></tr>
-                <tr><td>Downspouts</td><td>${window.stormResults.downspouts}</td><td>pcs</td></tr>
-                <tr><td>Catch Basins</td><td>${window.stormResults.catchBasins}</td><td>pcs</td></tr>
-                <tr><td>Manholes</td><td>${window.stormResults.manholes}</td><td>pcs</td></tr>
-                <tr><td>Fittings</td><td>${window.stormResults.fittings}</td><td>pcs</td></tr>
-              </table>
-            </div>
-            ` : ''}
-            
-            ${window.costResults ? `
-            <div class="section">
-              <h2>Cost Analysis</h2>
-              <table>
-                <tr><th>Item</th><th>Amount</th></tr>
-                <tr><td>Total Material Cost</td><td>${formatCurrency(window.costResults.totalMaterialCost)}</td></tr>
-                <tr><td>Total Labor Cost</td><td>${formatCurrency(window.costResults.totalLaborCost)}</td></tr>
-                <tr><td>Waste</td><td>${formatCurrency(window.costResults.wasteAmount)}</td></tr>
-                <tr><td>Overhead</td><td>${formatCurrency(window.costResults.overheadAmount)}</td></tr>
-                <tr><td>Profit Margin</td><td>${formatCurrency(window.costResults.profitAmount)}</td></tr>
-                <tr><td><strong>Total Project Cost</strong></td><td><strong>${formatCurrency(window.costResults.totalProjectCost)}</strong></td></tr>
-              </table>
-              
-              <h3>Labor Requirements</h3>
-              <p><strong>Estimated Duration:</strong> ${window.costResults.totalLaborDays.toFixed(1)} days (${(window.costResults.totalLaborDays/5).toFixed(1)} weeks)</p>
-              <p><strong>Productivity Standard:</strong> ${window.costResults.productivityStandard === 'philippines' ? 'Philippines (Manual/Low-tech)' : window.costResults.productivityStandard === 'international' ? 'International (Mechanized/High-tech)' : 'Custom'}</p>
-            </div>
-            ` : ''}
-            
-            <div class="section">
-              <h2>Design Standards & Assumptions</h2>
-              <p><strong>Plumbing Code:</strong> ${document.getElementById('codeStandard').value.toUpperCase()}</p>
-              <p><strong>Units:</strong> ${document.getElementById('units').value}</p>
-              <p><strong>Currency:</strong> ${document.getElementById('currency').value}</p>
-              <p><strong>Labor Rate:</strong> Plumber: ${formatCurrency(parseFloat(document.getElementById('plumberRate').value || 80))}/hour, Helper: ${formatCurrency(parseFloat(document.getElementById('helperRate').value || 50))}/hour</p>
-            </div>
-            
-            <div class="section">
-              <h2>Recommendations</h2>
-              <ul>
-                <li>Verify all calculations with local building codes and regulations</li>
-                <li>Consider soil conditions and groundwater levels for pipe installation</li>
-                <li>Include appropriate safety factors for extreme weather conditions</li>
-                <li>Consult with a licensed engineer for final design approval</li>
-              </ul>
-            </div>
-          </body>
-        </html>
-      `);
-      
-      reportWindow.document.close();
     }
   </script>
 </body>
