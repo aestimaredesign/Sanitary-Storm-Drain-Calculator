@@ -432,6 +432,16 @@
       margin-bottom: 5px;
       font-weight: 500;
     }
+    
+    .warning {
+      color: var(--warning);
+      font-weight: 500;
+    }
+    
+    .error {
+      color: var(--danger);
+      font-weight: 500;
+    }
   </style>
 </head>
 <body>
@@ -625,7 +635,7 @@
         <div class="form-row">
           <label for="cleanouts">Cleanouts:</label>
           <div class="input-group">
-            <input type="number" id="cleanouts" placeholder="Default = 1 per 30 m + bends" min="0">
+            <input type="number" id="cleanouts" placeholder="Default = based on code standard" min="0">
           </div>
         </div>
         <div class="form-row">
@@ -1055,6 +1065,32 @@
             </div>
           </div>
           
+          <h4>Crew Composition</h4>
+          <div class="form-row">
+            <label for="pipeCrewPlumbers">Pipe Laying Crew (Plumbers):</label>
+            <div class="input-group">
+              <input type="number" id="pipeCrewPlumbers" value="1" min="1" step="1">
+            </div>
+          </div>
+          <div class="form-row">
+            <label for="pipeCrewHelpers">Pipe Laying Crew (Helpers):</label>
+            <div class="input-group">
+              <input type="number" id="pipeCrewHelpers" value="2" min="0" step="1">
+            </div>
+          </div>
+          <div class="form-row">
+            <label for="fittingCrewPlumbers">Fitting Crew (Plumbers):</label>
+            <div class="input-group">
+              <input type="number" id="fittingCrewPlumbers" value="1" min="1" step="1">
+            </div>
+          </div>
+          <div class="form-row">
+            <label for="fittingCrewHelpers">Fitting Crew (Helpers):</label>
+            <div class="input-group">
+              <input type="number" id="fittingCrewHelpers" value="1" min="0" step="1">
+            </div>
+          </div>
+          
           <div class="form-row">
             <label for="plumberRate">Plumber Rate (per hour):</label>
             <div class="input-group">
@@ -1076,19 +1112,19 @@
           <div class="form-row">
             <label for="wasteFactor">Waste Factor (%):</label>
             <div class="input-group">
-              <input type="number" id="wasteFactor" value="5" min="0" max="20">
+              <input type="number" id="wasteFactor" value="5" min="0" max="50">
             </div>
           </div>
           <div class="form-row">
             <label for="overhead">Overhead (%):</label>
             <div class="input-group">
-              <input type="number" id="overhead" value="15" min="0" max="30">
+              <input type="number" id="overhead" value="15" min="0" max="50">
             </div>
           </div>
           <div class="form-row">
             <label for="profitMargin">Profit Margin (%):</label>
             <div class="input-group">
-              <input type="number" id="profitMargin" value="10" min="0" max="30">
+              <input type="number" id="profitMargin" value="10" min="0" max="50">
             </div>
           </div>
         </div>
@@ -1390,6 +1426,28 @@
       }
     };
 
+    // Accessory defaults based on plumbing codes
+    const accessoryDefaults = {
+      cleanouts: {
+        rnpcp: runLength => Math.ceil(runLength / 30), // 30 m per RNPCP
+        ipc: runLength => Math.ceil(runLength / (units === 'metric' ? 30.48 : 100)), // 100 ft per IPC
+        upc: runLength => Math.ceil(runLength / (units === 'metric' ? 30.48 : 100)) // 100 ft per UPC
+      },
+      vents: {
+        rnpcp: fixtureCount => fixtureCount,
+        ipc: fixtureCount => fixtureCount,
+        upc: fixtureCount => fixtureCount
+      },
+      traps: {
+        rnpcp: fixtureCount => fixtureCount,
+        ipc: fixtureCount => fixtureCount,
+        upc: fixtureCount => fixtureCount
+      }
+    };
+
+    // Debounce timer
+    let debounceTimeout;
+
     // Initialize the calculator
     document.addEventListener('DOMContentLoaded', function() {
       // Initialize units
@@ -1406,10 +1464,13 @@
         }
       });
       
-      // Add event listeners to cost inputs for auto-calculation
+      // Add event listeners to cost inputs for auto-calculation with debouncing
       const costInputs = document.querySelectorAll('.material-costs input, .labor-inputs input');
       costInputs.forEach(input => {
-        input.addEventListener('change', calculateCosts);
+        input.addEventListener('input', () => {
+          clearTimeout(debounceTimeout);
+          debounceTimeout = setTimeout(calculateCosts, 500);
+        });
       });
       
       // Initialize pipe size inputs
@@ -1465,6 +1526,22 @@
       document.getElementById('stormLengthUnit').textContent = isMetric ? 'm' : 'ft';
     }
     
+    // Check flow velocity for pipe sizing
+    function checkVelocity(flowRate, pipeSize, slope, isMetric, system) {
+      const diameter = parseInt(pipeSize) * (isMetric ? 0.0254 : 1/12); // Convert to meters or feet
+      const area = Math.PI * Math.pow(diameter/2, 2); // Cross-sectional area
+      const velocity = flowRate / (isMetric ? area : area * 7.4805); // Convert L/s to cfs for imperial
+      const minVelocity = system === 'sanitary' ? (isMetric ? 0.6 : 2) : (isMetric ? 1 : 3.3); // m/s or ft/s
+      const maxVelocity = isMetric ? 3 : 10; // m/s or ft/s
+      
+      if (velocity < minVelocity) {
+        return `Warning: Velocity (${velocity.toFixed(2)} ${isMetric ? 'm/s' : 'ft/s'}) below minimum recommended (${minVelocity} ${isMetric ? 'm/s' : 'ft/s'}). Risk of sedimentation.`;
+      } else if (velocity > maxVelocity) {
+        return `Warning: Velocity (${velocity.toFixed(2)} ${isMetric ? 'm/s' : 'ft/s'}) above maximum recommended (${maxVelocity} ${isMetric ? 'm/s' : 'ft/s'}). Risk of pipe erosion.`;
+      }
+      return '';
+    }
+    
     // Calculate sanitary system
     function calculateSanitary() {
       // Validate inputs
@@ -1472,6 +1549,7 @@
       
       const code = document.getElementById('codeStandard').value;
       const dfu = dfuTables[code];
+      const units = document.getElementById('units').value;
       
       // Calculate DFU
       let wc = parseInt(document.getElementById('wc').value) * dfu.wc;
@@ -1486,7 +1564,6 @@
       
       // Calculate flow rate
       let flowRate;
-      const units = document.getElementById('units').value;
       
       if (units === 'metric') {
         flowRate = (totalDFU / 2) * 0.06308; // L/s
@@ -1513,12 +1590,15 @@
         recommendedSize = sizes[sizes.length - 1];
       }
       
+      // Check velocity
+      const velocityWarning = checkVelocity(flowRate, recommendedSize, slope, units === 'metric', 'sanitary');
+      
       // Calculate pipe quantity
       const runLength = parseFloat(document.getElementById('sanLength').value);
       const pipeLen = parseFloat(document.getElementById('sanPipeLength').value);
       const pipeQty = Math.ceil(runLength / pipeLen);
       
-      // Calculate accessories with defaults if not provided
+      // Calculate accessories with code-specific defaults
       const fixtureCount = parseInt(document.getElementById('wc').value) + 
                           parseInt(document.getElementById('lav').value) + 
                           parseInt(document.getElementById('sink').value) + 
@@ -1527,9 +1607,9 @@
                           parseInt(document.getElementById('urinal').value) + 
                           parseInt(document.getElementById('floorDrain').value);
       
-      const traps = document.getElementById('traps').value || fixtureCount;
-      const vents = document.getElementById('vents').value || fixtureCount;
-      const cleanouts = document.getElementById('cleanouts').value || Math.ceil(runLength/30) + Math.ceil(runLength/20);
+      const traps = document.getElementById('traps').value || accessoryDefaults.traps[code](fixtureCount);
+      const vents = document.getElementById('vents').value || accessoryDefaults.vents[code](fixtureCount);
+      const cleanouts = document.getElementById('cleanouts').value || accessoryDefaults.cleanouts[code](runLength);
       const manholes = document.getElementById('sanManholes').value || Math.ceil(runLength/50);
       const fittings = document.getElementById('sanFittings').value || Math.ceil(runLength/10);
       
@@ -1539,14 +1619,20 @@
       const pipeSizeInch = recommendedSize;
       const pipeSizeMM = parseInt(recommendedSize) * 25.4;
       
-      document.getElementById('sanitaryOutput').innerHTML = `
+      let outputHTML = `
         <h3>Sanitary System Calculation Results</h3>
         <strong>Hydraulic Calculations:</strong>
         Total DFU (${code.toUpperCase()}): ${totalDFU}
         Peak Flow: ${flowRate.toFixed(2)} ${flowUnit}
         Recommended Pipe Size: ${pipeSizeInch}" (${pipeSizeMM} mm) ${material.toUpperCase()}
         Pipe Slope: ${slope}%
-        
+      `;
+      
+      if (velocityWarning) {
+        outputHTML += `<p class="warning">${velocityWarning}</p>`;
+      }
+      
+      outputHTML += `
         <strong>Quantity Takeoff:</strong>
         Total Run Length: ${runLength} ${lengthUnit}
         Commercial Pipe Length: ${pipeLen} m
@@ -1559,6 +1645,8 @@
         Manholes: ${manholes}
         Fittings/Elbows: ${fittings}
       `;
+      
+      document.getElementById('sanitaryOutput').innerHTML = outputHTML;
       
       // Store results for summary
       window.sanitaryResults = {
@@ -1577,6 +1665,10 @@
         fittings
       };
       
+      // Sync pipe size selection in costs tab
+      document.getElementById('pvcPipeSize').value = recommendedSize;
+      showPipeSizeInputs(material);
+      
       updateSanitarySummary();
     }
     
@@ -1594,12 +1686,12 @@
       const pipeLen = parseFloat(document.getElementById('stormPipeLength').value);
       const slope = parseFloat(document.getElementById('stormSlope').value);
       const material = document.getElementById('stormPipeMaterial').value;
+      const units = document.getElementById('units').value;
       
       // Calculate total area and flow
       const totalArea = roofArea + pavementArea;
       
       let Q;
-      const units = document.getElementById('units').value;
       
       if (units === 'metric') {
         Q = (C * I * totalArea) / 3600; // L/s
@@ -1624,6 +1716,9 @@
         recommendedSize = sizes[sizes.length - 1];
       }
       
+      // Check velocity
+      const velocityWarning = checkVelocity(Q, recommendedSize, slope, units === 'metric', 'storm');
+      
       // Calculate pipe quantity
       const pipeQty = Math.ceil(runLength / pipeLen);
       
@@ -1640,7 +1735,7 @@
       const pipeSizeInch = recommendedSize;
       const pipeSizeMM = parseInt(recommendedSize) * 25.4;
       
-      document.getElementById('stormOutput').innerHTML = `
+      let outputHTML = `
         <h3>Storm System Calculation Results</h3>
         <strong>Hydraulic Calculations:</strong>
         Total Drainage Area: ${totalArea.toFixed(1)} ${areaUnit}
@@ -1649,7 +1744,13 @@
         Peak Runoff: ${Q.toFixed(2)} ${flowUnit}
         Recommended Pipe Size: ${pipeSizeInch}" (${pipeSizeMM} mm) ${material.toUpperCase()}
         Pipe Slope: ${slope}%
-        
+      `;
+      
+      if (velocityWarning) {
+        outputHTML += `<p class="warning">${velocityWarning}</p>`;
+      }
+      
+      outputHTML += `
         <strong>Quantity Takeoff:</strong>
         Total Run Length: ${runLength} ${lengthUnit}
         Commercial Pipe Length: ${pipeLen} m
@@ -1661,6 +1762,8 @@
         Manholes: ${manholes}
         Fittings/Elbows: ${fittings}
       `;
+      
+      document.getElementById('stormOutput').innerHTML = outputHTML;
       
       // Store results for summary
       window.stormResults = {
@@ -1707,6 +1810,57 @@
       `;
     }
     
+    // Validate costs and labor inputs
+    function validateCosts() {
+      let isValid = true;
+      
+      // Reset errors
+      document.querySelectorAll('.validation-error').forEach(error => {
+        error.style.display = 'none';
+      });
+      
+      const costInputs = [
+        'pvcPipeCost2', 'pvcPipeCost3', 'pvcPipeCost4', 'pvcPipeCost6',
+        'castIronPipeCost2', 'castIronPipeCost3', 'castIronPipeCost4', 'castIronPipeCost6',
+        'hdpPipeCost2', 'hdpPipeCost3', 'hdpPipeCost4', 'hdpPipeCost6',
+        'absPipeCost2', 'absPipeCost3', 'absPipeCost4', 'absPipeCost6',
+        'corrugatedPipeCost4', 'corrugatedPipeCost6', 'corrugatedPipeCost8', 'corrugatedPipeCost10',
+        'concretePipeCost4', 'concretePipeCost6', 'concretePipeCost8', 'concretePipeCost10',
+        'trapCost', 'ventCost', 'cleanoutCost', 'manholeCost', 'fittingCost', 'downspoutCost', 'catchBasinCost',
+        'plumberRate', 'helperRate', 'dailyHours', 'wasteFactor', 'overhead', 'profitMargin',
+        'customPipeLaying', 'customManhole', 'customCatchBasin', 'customFitting',
+        'pipeCrewPlumbers', 'pipeCrewHelpers', 'fittingCrewPlumbers', 'fittingCrewHelpers'
+      ];
+      
+      costInputs.forEach(id => {
+        const input = document.getElementById(id);
+        if (!input) return; // Skip if input doesn't exist (e.g., custom rates when not selected)
+        
+        const value = parseFloat(input.value);
+        if (isNaN(value) || value < 0) {
+          showValidationError(id, `${input.previousElementSibling?.textContent || 'This field'} must be 0 or greater`);
+          isValid = false;
+        }
+        
+        if (['wasteFactor', 'overhead', 'profitMargin'].includes(id) && value > 50) {
+          showValidationError(id, `${input.previousElementSibling?.textContent || 'This field'} must be 50% or less`);
+          isValid = false;
+        }
+        
+        if (id === 'dailyHours' && (value < 1 || value > 12)) {
+          showValidationError(id, 'Daily hours must be between 1 and 12');
+          isValid = false;
+        }
+        
+        if (id.includes('Crew') && value < 0) {
+          showValidationError(id, 'Crew members cannot be negative');
+          isValid = false;
+        }
+      });
+      
+      return isValid;
+    }
+    
     // Helper function to get material cost based on material type and size
     function getMaterialCost(materialType, size) {
       // For pipe materials, we need both material type and size
@@ -1739,6 +1893,9 @@
     function calculateCosts() {
       console.log("calculateCosts function called");
       
+      // Validate cost inputs
+      if (!validateCosts()) return;
+      
       // Check if we have calculation results
       if (!window.sanitaryResults && !window.stormResults) {
         document.getElementById('costsOutput').innerHTML = `
@@ -1757,6 +1914,12 @@
       const overhead = parseFloat(document.getElementById('overhead').value) / 100;
       const profitMargin = parseFloat(document.getElementById('profitMargin').value) / 100;
       
+      // Get crew composition
+      const pipeCrewPlumbers = parseInt(document.getElementById('pipeCrewPlumbers').value);
+      const pipeCrewHelpers = parseInt(document.getElementById('pipeCrewHelpers').value);
+      const fittingCrewPlumbers = parseInt(document.getElementById('fittingCrewPlumbers').value);
+      const fittingCrewHelpers = parseInt(document.getElementById('fittingCrewHelpers').value);
+      
       const costTable = document.getElementById('costTable');
       
       // Clear existing rows (except header)
@@ -1767,6 +1930,9 @@
       let totalMaterialCost = 0;
       let totalLaborDays = 0;
       let totalLaborCost = 0;
+      
+      // Store BOQ items for export
+      const costResults = { items: [] };
       
       // Get productivity rates
       let productivity = {};
@@ -1810,9 +1976,16 @@
         const pipeMaterialCost = pipeCost * r.pipeQty;
         const pipeProductivity = productivity[material.toLowerCase() + 'Pipe'] || productivity.pvcPipe;
         const pipeLaborDays = r.runLength / pipeProductivity;
-        const pipeLaborCost = pipeLaborDays * (plumberRate + helperRate * 2) * dailyHours;
+        const pipeLaborCost = pipeLaborDays * (plumberRate * pipeCrewPlumbers + helperRate * pipeCrewHelpers) * dailyHours;
         
         addCostRow(`${r.pipeSize}" ${material.toUpperCase()} Pipe`, r.pipeQty, "pcs", formatCurrency(pipeCost), formatCurrency(pipeMaterialCost));
+        costResults.items.push({
+          description: `${r.pipeSize}" ${material.toUpperCase()} Pipe`,
+          quantity: r.pipeQty,
+          unit: 'pcs',
+          unitRate: pipeCost,
+          amount: pipeMaterialCost
+        });
         totalMaterialCost += pipeMaterialCost;
         totalLaborDays += pipeLaborDays;
         totalLaborCost += pipeLaborCost;
@@ -1820,9 +1993,16 @@
         // Fittings cost
         const fittingMaterialCost = fittingCost * r.fittings;
         const fittingLaborDays = r.fittings / productivity.fitting;
-        const fittingLaborCost = fittingLaborDays * (plumberRate + helperRate) * dailyHours;
+        const fittingLaborCost = fittingLaborDays * (plumberRate * fittingCrewPlumbers + helperRate * fittingCrewHelpers) * dailyHours;
         
         addCostRow('Sanitary Fittings', r.fittings, "pcs", formatCurrency(fittingCost), formatCurrency(fittingMaterialCost));
+        costResults.items.push({
+          description: 'Sanitary Fittings',
+          quantity: r.fittings,
+          unit: 'pcs',
+          unitRate: fittingCost,
+          amount: fittingMaterialCost
+        });
         totalMaterialCost += fittingMaterialCost;
         totalLaborDays += fittingLaborDays;
         totalLaborCost += fittingLaborCost;
@@ -1830,9 +2010,16 @@
         // Traps cost
         const trapMaterialCost = trapCost * r.traps;
         const trapLaborDays = r.traps / productivity.trap;
-        const trapLaborCost = trapLaborDays * (plumberRate + helperRate) * dailyHours;
+        const trapLaborCost = trapLaborDays * (plumberRate * fittingCrewPlumbers + helperRate * fittingCrewHelpers) * dailyHours;
         
         addCostRow('Traps', r.traps, "pcs", formatCurrency(trapCost), formatCurrency(trapMaterialCost));
+        costResults.items.push({
+          description: 'Traps',
+          quantity: r.traps,
+          unit: 'pcs',
+          unitRate: trapCost,
+          amount: trapMaterialCost
+        });
         totalMaterialCost += trapMaterialCost;
         totalLaborDays += trapLaborDays;
         totalLaborCost += trapLaborCost;
@@ -1840,9 +2027,16 @@
         // Vents cost
         const ventMaterialCost = ventCost * r.vents;
         const ventLaborDays = r.vents / productivity.vent;
-        const ventLaborCost = ventLaborDays * (plumberRate + helperRate) * dailyHours;
+        const ventLaborCost = ventLaborDays * (plumberRate * fittingCrewPlumbers + helperRate * fittingCrewHelpers) * dailyHours;
         
         addCostRow('Vents', r.vents, "pcs", formatCurrency(ventCost), formatCurrency(ventMaterialCost));
+        costResults.items.push({
+          description: 'Vents',
+          quantity: r.vents,
+          unit: 'pcs',
+          unitRate: ventCost,
+          amount: ventMaterialCost
+        });
         totalMaterialCost += ventMaterialCost;
         totalLaborDays += ventLaborDays;
         totalLaborCost += ventLaborCost;
@@ -1850,9 +2044,16 @@
         // Cleanouts cost
         const cleanoutMaterialCost = cleanoutCost * r.cleanouts;
         const cleanoutLaborDays = r.cleanouts / productivity.cleanout;
-        const cleanoutLaborCost = cleanoutLaborDays * (plumberRate + helperRate) * dailyHours;
+        const cleanoutLaborCost = cleanoutLaborDays * (plumberRate * fittingCrewPlumbers + helperRate * fittingCrewHelpers) * dailyHours;
         
         addCostRow('Cleanouts', r.cleanouts, "pcs", formatCurrency(cleanoutCost), formatCurrency(cleanoutMaterialCost));
+        costResults.items.push({
+          description: 'Cleanouts',
+          quantity: r.cleanouts,
+          unit: 'pcs',
+          unitRate: cleanoutCost,
+          amount: cleanoutMaterialCost
+        });
         totalMaterialCost += cleanoutMaterialCost;
         totalLaborDays += cleanoutLaborDays;
         totalLaborCost += cleanoutLaborCost;
@@ -1860,9 +2061,16 @@
         // Manholes cost
         const manholeMaterialCost = manholeCost * r.manholes;
         const manholeLaborDays = r.manholes / productivity.manhole;
-        const manholeLaborCost = manholeLaborDays * (plumberRate + helperRate * 2) * dailyHours;
+        const manholeLaborCost = manholeLaborDays * (plumberRate * pipeCrewPlumbers + helperRate * pipeCrewHelpers) * dailyHours;
         
         addCostRow('Manholes', r.manholes, "pcs", formatCurrency(manholeCost), formatCurrency(manholeMaterialCost));
+        costResults.items.push({
+          description: 'Manholes',
+          quantity: r.manholes,
+          unit: 'pcs',
+          unitRate: manholeCost,
+          amount: manholeMaterialCost
+        });
         totalMaterialCost += manholeMaterialCost;
         totalLaborDays += manholeLaborDays;
         totalLaborCost += manholeLaborCost;
@@ -1884,9 +2092,16 @@
         const pipeMaterialCost = pipeCost * r.pipeQty;
         const pipeProductivity = productivity[material.toLowerCase() + 'Pipe'] || productivity.pvcPipe;
         const pipeLaborDays = r.runLength / pipeProductivity;
-        const pipeLaborCost = pipeLaborDays * (plumberRate + helperRate * 2) * dailyHours;
+        const pipeLaborCost = pipeLaborDays * (plumberRate * pipeCrewPlumbers + helperRate * pipeCrewHelpers) * dailyHours;
         
         addCostRow(`${r.pipeSize}" ${material.toUpperCase()} Storm Pipe`, r.pipeQty, "pcs", formatCurrency(pipeCost), formatCurrency(pipeMaterialCost));
+        costResults.items.push({
+          description: `${r.pipeSize}" ${material.toUpperCase()} Storm Pipe`,
+          quantity: r.pipeQty,
+          unit: 'pcs',
+          unitRate: pipeCost,
+          amount: pipeMaterialCost
+        });
         totalMaterialCost += pipeMaterialCost;
         totalLaborDays += pipeLaborDays;
         totalLaborCost += pipeLaborCost;
@@ -1894,9 +2109,16 @@
         // Fittings cost
         const fittingMaterialCost = fittingCost * r.fittings;
         const fittingLaborDays = r.fittings / productivity.fitting;
-        const fittingLaborCost = fittingLaborDays * (plumberRate + helperRate) * dailyHours;
+        const fittingLaborCost = fittingLaborDays * (plumberRate * fittingCrewPlumbers + helperRate * fittingCrewHelpers) * dailyHours;
         
         addCostRow('Storm Fittings', r.fittings, "pcs", formatCurrency(fittingCost), formatCurrency(fittingMaterialCost));
+        costResults.items.push({
+          description: 'Storm Fittings',
+          quantity: r.fittings,
+          unit: 'pcs',
+          unitRate: fittingCost,
+          amount: fittingMaterialCost
+        });
         totalMaterialCost += fittingMaterialCost;
         totalLaborDays += fittingLaborDays;
         totalLaborCost += fittingLaborCost;
@@ -1904,9 +2126,16 @@
         // Downspouts cost
         const downspoutMaterialCost = downspoutCost * r.downspouts;
         const downspoutLaborDays = r.downspouts / productivity.downspout;
-        const downspoutLaborCost = downspoutLaborDays * (plumberRate + helperRate) * dailyHours;
+        const downspoutLaborCost = downspoutLaborDays * (plumberRate * fittingCrewPlumbers + helperRate * fittingCrewHelpers) * dailyHours;
         
         addCostRow('Downspouts', r.downspouts, "pcs", formatCurrency(downspoutCost), formatCurrency(downspoutMaterialCost));
+        costResults.items.push({
+          description: 'Downspouts',
+          quantity: r.downspouts,
+          unit: 'pcs',
+          unitRate: downspoutCost,
+          amount: downspoutMaterialCost
+        });
         totalMaterialCost += downspoutMaterialCost;
         totalLaborDays += downspoutLaborDays;
         totalLaborCost += downspoutLaborCost;
@@ -1914,9 +2143,16 @@
         // Catch basins cost
         const catchBasinMaterialCost = catchBasinCost * r.catchBasins;
         const catchBasinLaborDays = r.catchBasins / productivity.catchBasin;
-        const catchBasinLaborCost = catchBasinLaborDays * (plumberRate + helperRate * 2) * dailyHours;
+        const catchBasinLaborCost = catchBasinLaborDays * (plumberRate * pipeCrewPlumbers + helperRate * pipeCrewHelpers) * dailyHours;
         
         addCostRow('Catch Basins', r.catchBasins, "pcs", formatCurrency(catchBasinCost), formatCurrency(catchBasinMaterialCost));
+        costResults.items.push({
+          description: 'Catch Basins',
+          quantity: r.catchBasins,
+          unit: 'pcs',
+          unitRate: catchBasinCost,
+          amount: catchBasinMaterialCost
+        });
         totalMaterialCost += catchBasinMaterialCost;
         totalLaborDays += catchBasinLaborDays;
         totalLaborCost += catchBasinLaborCost;
@@ -1924,9 +2160,16 @@
         // Manholes cost
         const manholeMaterialCost = manholeCost * r.manholes;
         const manholeLaborDays = r.manholes / productivity.manhole;
-        const manholeLaborCost = manholeLaborDays * (plumberRate + helperRate * 2) * dailyHours;
+        const manholeLaborCost = manholeLaborDays * (plumberRate * pipeCrewPlumbers + helperRate * pipeCrewHelpers) * dailyHours;
         
         addCostRow('Storm Manholes', r.manholes, "pcs", formatCurrency(manholeCost), formatCurrency(manholeMaterialCost));
+        costResults.items.push({
+          description: 'Storm Manholes',
+          quantity: r.manholes,
+          unit: 'pcs',
+          unitRate: manholeCost,
+          amount: manholeMaterialCost
+        });
         totalMaterialCost += manholeMaterialCost;
         totalLaborDays += manholeLaborDays;
         totalLaborCost += manholeLaborCost;
@@ -1995,6 +2238,7 @@
       
       // Store cost results for PDF
       window.costResults = {
+        items: costResults.items,
         totalMaterialCost,
         totalLaborCost,
         totalProjectCost,
@@ -2002,7 +2246,12 @@
         overheadAmount,
         profitAmount,
         totalLaborDays,
-        productivityStandard
+        productivityStandard,
+        plumberLaborDays,
+        helperLaborDays,
+        plumberLaborCost,
+        helperLaborCost,
+        subtotal
       };
     }
     
@@ -2164,100 +2413,43 @@
       input.click();
     }
     
-    // Extract data directly from the displayed BOQ table with CORRECTED spelling
+    // Extract BOQ data from stored results
     function extractBOQDataFromDisplay() {
-        const table = document.getElementById('costTable');
-        if (!table) {
-            return getFallbackData();
-        }
-        
-        const rows = table.querySelectorAll('tr');
-        const data = [];
-        let isFirstHeaderRow = true; // Flag to track if we've already added the header
-        
-        rows.forEach(row => {
-            const cells = row.querySelectorAll('td, th');
-            const rowData = ['', '', '', '', '']; // Initialize with 5 empty columns
-            
-            cells.forEach((cell, index) => {
-                if (index < 5) {
-                    let text = cell.textContent.trim();
-                    
-                    // Remove currency symbols but keep numbers and text
-                    text = text.replace(/[₱P,]/g, '').trim();
-                    
-                    // FIX SPELLING ERRORS - CORRECTED "Plumber" spelling
-                    if (text.includes('lumber') && !text.includes('Plumber')) {
-                        text = text.replace('lumber', 'Plumber');
-                    }
-                    if (text.includes('rofit') || text.includes('Rollt') || text.includes('rollt')) {
-                        text = 'Profit Margin';
-                    }
-                    if (text.includes('ROJECT') || text.includes('ROUECT') || text.includes('ROECT')) {
-                        text = 'TOTAL PROJECT COST';
-                    }
-                    if (text === 'TOTAL ROJECT COST') {
-                        text = 'TOTAL PROJECT COST';
-                    }
-                    if (text === 'rofit Margin') {
-                        text = 'Profit Margin';
-                    }
-                    
-                    rowData[index] = text;
-                }
-            });
-            
-            // Skip the second header row (the one with "Description, Quantity, Unit, Unit Rate, Amount")
-            const isHeaderRow = rowData[0] === 'Description' && 
-                               rowData[1] === 'Quantity' && 
-                               rowData[2] === 'Unit' && 
-                               rowData[3] === 'Unit Rate' && 
-                               rowData[4] === 'Amount';
-            
-            if (isHeaderRow) {
-                if (isFirstHeaderRow) {
-                    // Add only the first header row
-                    data.push(rowData);
-                    isFirstHeaderRow = false;
-                }
-                // Skip any subsequent header rows
-                return;
-            }
-            
-            // Fix the structure for summary rows - ensure amounts are only in column 4
-            if (rowData[0].includes("Materials Subtotal") || 
-                rowData[0].includes("Waste") || 
-                rowData[0].includes("Materials Total") || 
-                rowData[0].includes("Labor Total") || 
-                rowData[0].includes("Materials + Labor") || 
-                rowData[0].includes("Overhead") || 
-                rowData[0].includes("Profit Margin") || 
-                rowData[0].includes("TOTAL PROJECT COST")) {
-                
-                // If amount is wrongly placed in quantity column (column 1), move it to amount column (column 4)
-                if (rowData[1] && rowData[1].match(/[\d.,]/) && !rowData[4]) {
-                    rowData[4] = rowData[1]; // Move amount from column 1 to column 4
-                    rowData[1] = ''; // Clear column 1
-                }
-                
-                // If amount is wrongly placed in unit rate column (column 3), move it to amount column (column 4)
-                if (rowData[3] && rowData[3].match(/[\d.,]/) && !rowData[4]) {
-                    rowData[4] = rowData[3]; // Move amount from column 3 to column 4
-                    rowData[3] = ''; // Clear column 3
-                }
-                
-                // Ensure columns 1, 2, 3 are empty for summary rows
-                rowData[1] = ''; // Quantity column
-                rowData[2] = ''; // Unit column  
-                rowData[3] = ''; // Unit Rate column
-            }
-            
-            if (!rowData.every(cell => cell === '')) {
-                data.push(rowData);
-            }
-        });
-        
-        return data.length > 0 ? data : getFallbackData();
+      if (!window.costResults) {
+        alert('No calculations performed. Using sample data for export.');
+        return getFallbackData();
+      }
+      
+      const r = window.costResults;
+      const wasteFactor = parseFloat(document.getElementById('wasteFactor').value) / 100;
+      const overhead = parseFloat(document.getElementById('overhead').value) / 100;
+      const profitMargin = parseFloat(document.getElementById('profitMargin').value) / 100;
+      const plumberRate = parseFloat(document.getElementById('plumberRate').value);
+      const helperRate = parseFloat(document.getElementById('helperRate').value);
+      const dailyHours = parseInt(document.getElementById('dailyHours').value);
+      
+      return [
+        ['Description', 'Quantity', 'Unit', 'Unit Rate', 'Amount'],
+        ...r.items.map(item => [
+          item.description,
+          item.quantity.toString(),
+          item.unit,
+          formatCurrency(item.unitRate),
+          formatCurrency(item.amount)
+        ]),
+        ['Materials Subtotal', '', '', '', formatCurrency(r.totalMaterialCost)],
+        [`Waste (${(wasteFactor*100).toFixed(0)}%)`, '', '', '', formatCurrency(r.wasteAmount)],
+        ['Materials Total', '', '', '', formatCurrency(r.totalMaterialCost + r.wasteAmount)],
+        ['Labor', '', '', '', ''],
+        ['Plumber', r.plumberLaborDays.toFixed(1), 'days', formatCurrency(plumberRate * dailyHours), formatCurrency(r.plumberLaborCost)],
+        ['Helper', r.helperLaborDays.toFixed(1), 'days', formatCurrency(helperRate * dailyHours), formatCurrency(r.helperLaborCost)],
+        ['Labor Total', '', '', '', formatCurrency(r.totalLaborCost)],
+        ['Summary', '', '', '', ''],
+        ['Materials + Labor', '', '', '', formatCurrency(r.subtotal)],
+        [`Overhead (${(overhead*100).toFixed(0)}%)`, '', '', '', formatCurrency(r.overheadAmount)],
+        [`Profit Margin (${(profitMargin*100).toFixed(0)}%)`, '', '', '', formatCurrency(r.profitAmount)],
+        ['TOTAL PROJECT COST', '', '', '', formatCurrency(r.totalProjectCost)]
+      ];
     }
 
     // Export to PDF
@@ -2273,7 +2465,7 @@
             const preparedBy = document.getElementById("preparedBy")?.value || "Prepared By";
             const date = new Date().toLocaleDateString();
 
-            // Get the actual calculated values from the displayed BOQ table
+            // Get the actual calculated values from the stored BOQ data
             const boqTable = extractBOQDataFromDisplay();
             
             // Remove the header row from the table data since we'll add it manually in autoTable
@@ -2444,74 +2636,79 @@
     
     // Export to Excel
     function exportToExcel() {
-      const wb = XLSX.utils.book_new();
-      
-      // Project info sheet
-      const projectData = [
-        ['Project Information', ''],
-        ['Project Name', document.getElementById('projectName').value],
-        ['Client Name', document.getElementById('clientName').value],
-        ['Location', document.getElementById('projectLocation').value],
-        ['Prepared By', document.getElementById('preparedBy').value],
-        ['Currency', document.getElementById('currency').value],
-        ['Code Standard', document.getElementById('codeStandard').value],
-        ['Units', document.getElementById('units').value],
-        ['', ''],
-        ['Generated on', new Date().toLocaleString()]
-      ];
-      
-      const projectWs = XLSX.utils.aoa_to_sheet(projectData);
-      XLSX.utils.book_append_sheet(wb, projectWs, "Project Info");
-      
-      // Sanitary sheet
-      if (window.sanitaryResults) {
-        const r = window.sanitaryResults;
-        const sanitaryData = [
-          ['SANITARY SYSTEM QUANTITIES', ''],
-          ['Hydraulic Calculations', ''],
-          ['Total DFU', r.totalDFU],
-          ['Peak Flow', `${r.flowRate.toFixed(2)} ${r.flowUnit}`],
-          ['Recommended Pipe Size', `${r.pipeSize}" ${r.pipeMaterial}`],
+      try {
+        const wb = XLSX.utils.book_new();
+        
+        // Project info sheet
+        const projectData = [
+          ['Project Information', ''],
+          ['Project Name', document.getElementById('projectName').value],
+          ['Client Name', document.getElementById('clientName').value],
+          ['Location', document.getElementById('projectLocation').value],
+          ['Prepared By', document.getElementById('preparedBy').value],
+          ['Currency', document.getElementById('currency').value],
+          ['Code Standard', document.getElementById('codeStandard').value],
+          ['Units', document.getElementById('units').value],
           ['', ''],
-          ['Quantity Takeoff', ''],
-          ['Pipe Length', `${r.runLength} ${r.lengthUnit}`],
-          ['Pipe Sections', r.pipeQty],
-          ['Traps', r.traps],
-          ['Vents', r.vents],
-          ['Cleanouts', r.cleanouts],
-          ['Manholes', r.manholes],
-          ['Fittings/Elbows', r.fittings]
+          ['Generated on', new Date().toLocaleString()]
         ];
         
-        const sanitaryWs = XLSX.utils.aoa_to_sheet(sanitaryData);
-        XLSX.utils.book_append_sheet(wb, sanitaryWs, "Sanitary System");
-      }
-      
-      // Storm sheet
-      if (window.stormResults) {
-        const r = window.stormResults;
-        const stormData = [
-          ['STORM SYSTEM QUANTITIES', ''],
-          ['Hydraulic Calculations', ''],
-          ['Total Drainage Area', `${r.totalArea.toFixed(1)} ${r.areaUnit}`],
-          ['Peak Runoff', `${r.flowRate.toFixed(2)} ${r.flowUnit}`],
-          ['Recommended Pipe Size', `${r.pipeSize}" ${r.pipeMaterial}`],
-          ['', ''],
-          ['Quantity Takeoff', ''],
-          ['Pipe Length', `${r.runLength} ${r.lengthUnit}`],
-          ['Pipe Sections', r.pipeQty],
-          ['Downspouts', r.downspouts],
-          ['Catch Basins', r.catchBasins],
-          ['Manholes', r.manholes],
-          ['Fittings/Elbows', r.fittings]
-        ];
+        const projectWs = XLSX.utils.aoa_to_sheet(projectData);
+        XLSX.utils.book_append_sheet(wb, projectWs, "Project Info");
         
-        const stormWs = XLSX.utils.aoa_to_sheet(stormData);
-        XLSX.utils.book_append_sheet(wb, stormWs, "Storm System");
+        // Sanitary sheet
+        if (window.sanitaryResults) {
+          const r = window.sanitaryResults;
+          const sanitaryData = [
+            ['SANITARY SYSTEM QUANTITIES', ''],
+            ['Hydraulic Calculations', ''],
+            ['Total DFU', r.totalDFU],
+            ['Peak Flow', `${r.flowRate.toFixed(2)} ${r.flowUnit}`],
+            ['Recommended Pipe Size', `${r.pipeSize}" ${r.pipeMaterial}`],
+            ['', ''],
+            ['Quantity Takeoff', ''],
+            ['Pipe Length', `${r.runLength} ${r.lengthUnit}`],
+            ['Pipe Sections', r.pipeQty],
+            ['Traps', r.traps],
+            ['Vents', r.vents],
+            ['Cleanouts', r.cleanouts],
+            ['Manholes', r.manholes],
+            ['Fittings/Elbows', r.fittings]
+          ];
+          
+          const sanitaryWs = XLSX.utils.aoa_to_sheet(sanitaryData);
+          XLSX.utils.book_append_sheet(wb, sanitaryWs, "Sanitary System");
+        }
+        
+        // Storm sheet
+        if (window.stormResults) {
+          const r = window.stormResults;
+          const stormData = [
+            ['STORM SYSTEM QUANTITIES', ''],
+            ['Hydraulic Calculations', ''],
+            ['Total Drainage Area', `${r.totalArea.toFixed(1)} ${r.areaUnit}`],
+            ['Peak Runoff', `${r.flowRate.toFixed(2)} ${r.flowUnit}`],
+            ['Recommended Pipe Size', `${r.pipeSize}" ${r.pipeMaterial}`],
+            ['', ''],
+            ['Quantity Takeoff', ''],
+            ['Pipe Length', `${r.runLength} ${r.lengthUnit}`],
+            ['Pipe Sections', r.pipeQty],
+            ['Downspouts', r.downspouts],
+            ['Catch Basins', r.catchBasins],
+            ['Manholes', r.manholes],
+            ['Fittings/Elbows', r.fittings]
+          ];
+          
+          const stormWs = XLSX.utils.aoa_to_sheet(stormData);
+          XLSX.utils.book_append_sheet(wb, stormWs, "Storm System");
+        }
+        
+        // Save the Excel file
+        XLSX.writeFile(wb, `${document.getElementById('projectName').value}_Report.xlsx`);
+      } catch (error) {
+        alert('Error generating Excel: ' + error.message);
+        console.error(error);
       }
-      
-      // Save the Excel file
-      XLSX.writeFile(wb, `${document.getElementById('projectName').value}_Report.xlsx`);
     }
   </script>
 </body>
