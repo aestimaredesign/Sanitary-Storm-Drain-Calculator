@@ -1359,16 +1359,17 @@
       const materialName = getMaterialName(material);
       
       pipeRow.innerHTML = `
-        <select class="size-select" onchange="updatePipeCost('${pipeId}')">
-          <option value="2">2"</option>
-          <option value="3">3"</option>
-          <option value="4" selected>4"</option>
-          <option value="6">6"</option>
-        </select>
-        <span>${materialName} Pipe Cost:</span>
-        <input type="number" class="cost-input" value="${getDefaultPipeCost(material, '4')}" min="0" step="0.01" onchange="updatePipeCost('${pipeId}')">
-        <button class="remove-pipe-btn" onclick="removePipe('${pipeId}')">Remove</button>
-      `;
+    <select class="size-select" onchange="updatePipeCost('${pipeId}')">
+        <option value="2">2"</option>
+        <option value="3">3"</option>
+        <option value="4" selected>4"</option>
+        <option value="6">6"</option>
+    </select>
+    <span>${materialName} Pipe Cost:</span>
+    <input type="number" class="cost-input" value="${getDefaultPipeCost(material, '4')}" min="0" step="0.01">
+    <button class="add-pipe-btn" onclick="resetPipeCost('${pipeId}')">Reset Cost</button>
+    <button class="remove-pipe-btn" onclick="removePipe('${pipeId}')">Remove</button>
+`;
       
       container.appendChild(pipeRow);
     }
@@ -1387,16 +1388,17 @@
       const materialName = getMaterialName(material);
       
       pipeRow.innerHTML = `
-        <select class="size-select" onchange="updatePipeCost('${pipeId}')">
-          <option value="4" selected>4"</option>
-          <option value="6">6"</option>
-          <option value="8">8"</option>
-          <option value="10">10"</option>
-        </select>
-        <span>${materialName} Pipe Cost:</span>
-        <input type="number" class="cost-input" value="${getDefaultPipeCost(material, '4')}" min="0" step="0.01" onchange="updatePipeCost('${pipeId}')">
-        <button class="remove-pipe-btn" onclick="removePipe('${pipeId}')">Remove</button>
-      `;
+    <select class="size-select" onchange="updatePipeCost('${pipeId}')">
+        <option value="2">2"</option>
+        <option value="3">3"</option>
+        <option value="4" selected>4"</option>
+        <option value="6">6"</option>
+    </select>
+    <span>${materialName} Pipe Cost:</span>
+    <input type="number" class="cost-input" value="${getDefaultPipeCost(material, '4')}" min="0" step="0.01">
+    <button class="add-pipe-btn" onclick="resetPipeCost('${pipeId}')">Reset Cost</button>
+    <button class="remove-pipe-btn" onclick="removePipe('${pipeId}')">Remove</button>
+`;
       
       container.appendChild(pipeRow);
     }
@@ -1411,24 +1413,28 @@
     
     // Update pipe cost when size changes
     function updatePipeCost(pipeId) {
-      const pipeRow = document.getElementById(pipeId);
-      if (!pipeRow) return;
-      
-      const sizeSelect = pipeRow.querySelector('.size-select');
-      const costInput = pipeRow.querySelector('.cost-input');
-      const size = sizeSelect.value;
-      
-      // Determine material based on pipe ID prefix
-      let material;
-      if (pipeId.startsWith('sanitaryPipe_')) {
+    const pipeRow = document.getElementById(pipeId);
+    if (!pipeRow) return;
+
+    const sizeSelect = pipeRow.querySelector('.size-select');
+    const costInput = pipeRow.querySelector('.cost-input');
+    const size = sizeSelect.value;
+
+    // Determine material based on pipe ID prefix
+    let material;
+    if (pipeId.startsWith('sanitaryPipe_')) {
         material = document.getElementById('sanPipeMaterial').value;
-      } else if (pipeId.startsWith('stormPipe_')) {
+    } else if (pipeId.startsWith('stormPipe_')) {
         material = document.getElementById('stormPipeMaterial').value;
-      }
-      
-      // Update cost with default value for the selected size
-      costInput.value = getDefaultPipeCost(material, size);
     }
+
+    // Only update cost if the input is empty or matches the previous default
+    const currentValue = parseFloat(costInput.value);
+    const defaultCost = getDefaultPipeCost(material, size);
+    if (!costInput.value || currentValue === defaultCost) {
+        costInput.value = defaultCost;
+    }
+}
     
     // Get material display name
     function getMaterialName(material) {
@@ -2242,180 +2248,84 @@
       }
     }
     
-    // Format currency based on selection
-    function formatCurrency(amount) {
-      if (isNaN(amount)) return '';
-      const currency = document.getElementById('currency').value;
-      const formatter = new Intl.NumberFormat('en-US', {
+    // Format currency based on selection (updated to remove ± and handle edge cases)
+function formatCurrency(amount) {
+    if (isNaN(amount) || amount === null || amount === undefined) return '';
+    const currency = document.getElementById('currency').value;
+    const formatter = new Intl.NumberFormat('en-US', {
         style: 'currency',
         currency: currency,
         minimumFractionDigits: 2
-      });
-      return formatter.format(amount);
-    }
-    
-    // Input validation
-    function validateInputs(system) {
-      let isValid = true;
-      
-      // Reset errors
-      document.querySelectorAll('.validation-error').forEach(error => {
-        error.style.display = 'none';
-      });
-      
-      // Project name validation
-      const projectName = document.getElementById('projectName').value;
-      if (!projectName.trim()) {
-        document.getElementById('projectNameError').style.display = 'block';
-        isValid = false;
-      }
-      
-      // System-specific validation
-      if (system === 'sanitary') {
-        const runLength = parseFloat(document.getElementById('sanLength').value);
-        if (isNaN(runLength) || runLength <= 0) {
-          showValidationError('sanLength', 'Length must be greater than 0');
-          isValid = false;
-        }
-      }
-      
-      if (system === 'storm') {
-        const roofArea = parseFloat(document.getElementById('roofArea').value);
-        if (isNaN(roofArea) || roofArea < 0) {
-          showValidationError('roofArea', 'Area must be 0 or greater');
-          isValid = false;
-        }
-        
-        const intensity = parseFloat(document.getElementById('intensity').value);
-        if (isNaN(intensity) || intensity <= 0) {
-          showValidationError('intensity', 'Intensity must be greater than 0');
-          isValid = false;
-        }
-      }
-      
-      return isValid;
-    }
-    
-    function showValidationError(fieldId, message) {
-      // Create error element if it doesn't exist
-      let errorElement = document.getElementById(fieldId + 'Error');
-      if (!errorElement) {
-        errorElement = document.createElement('div');
-        errorElement.className = 'validation-error';
-        errorElement.id = fieldId + 'Error';
-        document.getElementById(fieldId).parentNode.appendChild(errorElement);
-      }
-      
-      errorElement.textContent = message;
-      errorElement.style.display = 'block';
-    }
-    
-    // Save project data
-    function saveProject() {
-      const projectData = {
-        reportTitle: "Sanitary & Storm Drain Calculator Report",
-        projectName: document.getElementById('projectName').value,
-        clientName: document.getElementById('clientName').value,
-        projectLocation: document.getElementById('projectLocation').value,
-        preparedBy: document.getElementById('preparedBy').value,
-        currency: document.getElementById('currency').value,
-        codeStandard: document.getElementById('codeStandard').value,
-        units: document.getElementById('units').value,
-        sanitaryResults: window.sanitaryResults,
-        stormResults: window.stormResults,
-        costResults: window.costResults
-      };
-      
-      const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(projectData));
-      const downloadAnchorNode = document.createElement('a');
-      downloadAnchorNode.setAttribute("href", dataStr);
-      downloadAnchorNode.setAttribute("download", document.getElementById('projectName').value + "_QTO.json");
-      document.body.appendChild(downloadAnchorNode);
-      downloadAnchorNode.click();
-      downloadAnchorNode.remove();
-    }
-    
-    // Load project data
-    function loadProject() {
-      const input = document.createElement('input');
-      input.type = 'file';
-      input.accept = '.json';
-      input.onchange = e => {
-        const file = e.target.files[0];
-        const reader = new FileReader();
-        reader.onload = function(event) {
-          const projectData = JSON.parse(event.target.result);
-          
-          // Populate form fields
-          document.getElementById('projectName').value = projectData.projectName || '';
-          document.getElementById('clientName').value = projectData.clientName || '';
-          document.getElementById('projectLocation').value = projectData.projectLocation || '';
-          document.getElementById('preparedBy').value = projectData.preparedBy || '';
-          document.getElementById('currency').value = projectData.currency || 'PHP';
-          document.getElementById('codeStandard').value = projectData.codeStandard || 'rnpcp';
-          document.getElementById('units').value = projectData.units || 'metric';
-          updateUnits();
-          
-          // Restore calculation results
-          window.sanitaryResults = projectData.sanitaryResults;
-          window.stormResults = projectData.stormResults;
-          window.costResults = projectData.costResults;
-          
-          // Update summaries
-          updateSanitarySummary();
-          updateStormSummary();
-          
-          alert('Project loaded successfully!');
-        };
-        reader.readAsText(file);
-      };
-      input.click();
-    }
-    
-    // Extract BOQ data from stored results
-    function extractBOQDataFromDisplay() {
-      if (!window.costResults) {
+    });
+    let formatted = formatter.format(amount);
+    // Remove ± symbols
+    formatted = formatted.replace(/±/g, '');
+    return formatted;
+}
+
+// Extract BOQ data specifically for PDF export (updated for cleaner data)
+function extractBOQDataForPDF() {
+    if (!window.costResults) {
         alert('No calculations performed. Using sample data for export.');
         return getFallbackData();
-      }
-      
-      const r = window.costResults;
-      const wasteFactor = parseFloat(document.getElementById('wasteFactor').value) / 100;
-      const overhead = parseFloat(document.getElementById('overhead').value) / 100;
-      const profitMargin = parseFloat(document.getElementById('profitMargin').value) / 100;
-      const plumberRate = parseFloat(document.getElementById('plumberRate').value);
-      const helperRate = parseFloat(document.getElementById('helperRate').value);
-      const dailyHours = parseInt(document.getElementById('dailyHours').value);
-      
-      return [
-        ['Description', 'Quantity', 'Unit', 'Unit Rate', 'Amount'],
-        ...r.items.map(item => [
-          item.description,
-          item.quantity.toString(),
-          item.unit,
-          formatCurrency(item.unitRate),
-          formatCurrency(item.amount)
-        ]),
-        ['Materials Subtotal', '', '', '', formatCurrency(r.totalMaterialCost)],
-        [`Waste (${(wasteFactor*100).toFixed(0)}%)`, '', '', '', formatCurrency(r.wasteAmount)],
-        ['Materials Total', '', '', '', formatCurrency(r.totalMaterialCost + r.wasteAmount)],
-        ['Labor', '', '', '', ''],
-        ['Plumber', r.plumberLaborDays.toFixed(1), 'days', formatCurrency(plumberRate * dailyHours), formatCurrency(r.plumberLaborCost)],
-        ['Helper', r.helperLaborDays.toFixed(1), 'days', formatCurrency(helperRate * dailyHours), formatCurrency(r.helperLaborCost)],
-        ['Labor Total', '', '', '', formatCurrency(r.totalLaborCost)],
-        ['Summary', '', '', '', ''],
-        ['Materials + Labor', '', '', '', formatCurrency(r.subtotal)],
-        [`Overhead (${(overhead*100).toFixed(0)}%)`, '', '', '', formatCurrency(r.overheadAmount)],
-        [`Profit Margin (${(profitMargin*100).toFixed(0)}%)`, '', '', '', formatCurrency(r.profitAmount)],
-        ['TOTAL PROJECT COST', '', '', '', formatCurrency(r.totalProjectCost)]
-      ];
     }
 
-    // Export to PDF - FIXED VERSION for Sanitary & Storm Drain Calculator
+    const r = window.costResults;
+    const wasteFactor = parseFloat(document.getElementById('wasteFactor').value) / 100;
+    const overhead = parseFloat(document.getElementById('overhead').value) / 100;
+    const profitMargin = parseFloat(document.getElementById('profitMargin').value) / 100;
+    const plumberRate = parseFloat(document.getElementById('plumberRate').value);
+    const helperRate = parseFloat(document.getElementById('helperRate').value);
+    const dailyHours = parseInt(document.getElementById('dailyHours').value);
+
+    const data = [
+        ['Description', 'Quantity', 'Unit', 'Unit Rate', 'Amount'],
+        ['Materials', '', '', '', '']
+    ];
+
+    // Add material items
+    if (r.items && r.items.length > 0) {
+        r.items.forEach(item => {
+            data.push([
+                item.description,
+                item.quantity.toString(),
+                item.unit,
+                item.unitRate ? formatCurrency(item.unitRate) : '',
+                item.amount ? formatCurrency(item.amount) : ''
+            ]);
+        });
+    }
+
+    // Add materials subtotal and waste
+    data.push(['Materials Subtotal', '', '', '', formatCurrency(r.totalMaterialCost)]);
+    data.push([`Waste (${(wasteFactor * 100).toFixed(0)}%)`, '', '', '', formatCurrency(r.wasteAmount)]);
+    data.push(['Materials Total', '', '', '', formatCurrency(r.totalMaterialCost + r.wasteAmount)]);
+
+    // Add labor section
+    data.push(['Labor', '', '', '', '']);
+    data.push(['Plumber', r.plumberLaborDays.toFixed(1), 'days', formatCurrency(plumberRate * dailyHours), formatCurrency(r.plumberLaborCost)]);
+    data.push(['Helper', r.helperLaborDays.toFixed(1), 'days', formatCurrency(helperRate * dailyHours), formatCurrency(r.helperLaborCost)]);
+    data.push(['Labor Total', '', '', '', formatCurrency(r.totalLaborCost)]);
+
+    // Add summary section
+    data.push(['Summary', '', '', '', '']);
+    data.push(['Materials + Labor', '', '', '', formatCurrency(r.subtotal)]);
+    data.push([`Overhead (${(overhead * 100).toFixed(0)}%)`, '', '', '', formatCurrency(r.overheadAmount)]);
+    data.push([`Profit Margin (${(profitMargin * 100).toFixed(0)}%)`, '', '', '', formatCurrency(r.profitAmount)]);
+    data.push(['TOTAL PROJECT COST', '', '', '', formatCurrency(r.totalProjectCost)]);
+
+    return data;
+}
+
+// Updated exportToPDF function
 function exportToPDF() {
     try {
         const { jsPDF } = window.jspdf;
-        const doc = new jsPDF();
+        const doc = new jsPDF({
+            orientation: 'portrait',
+            unit: 'mm',
+            format: 'a4'
+        });
 
         // Get project information
         const projectName = document.getElementById("projectName")?.value || "Sanitary & Storm Project";
@@ -2426,23 +2336,19 @@ function exportToPDF() {
 
         // Get the actual calculated values from the stored BOQ data
         const boqTable = extractBOQDataForPDF();
-        
-        // Remove the header row from the table data since we'll add it manually in autoTable
-        const tableBody = boqTable.filter(row => 
-            !(row[0] === 'Description' && row[1] === 'Quantity' && row[2] === 'Unit' && row[3] === 'Unit Rate' && row[4] === 'Amount')
-        );
+        const tableBody = boqTable.slice(1); // Remove header row
 
         // Set margins and initial position
-        const margin = 15;
+        const margin = 10;
         let y = margin;
 
         // Add header information
-        doc.setFontSize(18);
+        doc.setFontSize(16);
         doc.setFont("helvetica", "bold");
         doc.text("Sanitary & Storm Drain Report", margin, y);
-        y += 10;
+        y += 8;
 
-        doc.setFontSize(10);
+        doc.setFontSize(9);
         doc.setFont("helvetica", "normal");
         doc.text(`Project: ${projectName}`, margin, y);
         doc.text(`Client: ${clientName}`, 100, y);
@@ -2451,12 +2357,12 @@ function exportToPDF() {
         doc.text(`Date: ${date}`, 100, y);
         y += 5;
         doc.text(`Prepared by: ${preparedBy}`, margin, y);
-        y += 15;
+        y += 10;
 
         // Add system summaries
         if (window.sanitaryResults) {
             const r = window.sanitaryResults;
-            doc.setFontSize(11);
+            doc.setFontSize(10);
             doc.setFont("helvetica", "bold");
             doc.text("Sanitary System Summary", margin, y);
             y += 6;
@@ -2466,12 +2372,12 @@ function exportToPDF() {
             doc.text(`Pipe: ${r.pipeQty} sections of ${r.pipeSize}" ${r.pipeMaterial} (${r.runLength} ${r.lengthUnit})`, margin, y);
             y += 5;
             doc.text(`Accessories: ${r.traps} traps, ${r.vents} vents, ${r.cleanouts} cleanouts, ${r.manholes} manholes`, margin, y);
-            y += 10;
+            y += 8;
         }
-        
+
         if (window.stormResults) {
             const r = window.stormResults;
-            doc.setFontSize(11);
+            doc.setFontSize(10);
             doc.setFont("helvetica", "bold");
             doc.text("Storm System Summary", margin, y);
             y += 6;
@@ -2483,98 +2389,99 @@ function exportToPDF() {
             doc.text(`Pipe: ${r.pipeQty} sections of ${r.pipeSize}" ${r.pipeMaterial} (${r.runLength} ${r.lengthUnit})`, margin, y);
             y += 5;
             doc.text(`Accessories: ${r.downspouts} downspouts, ${r.catchBasins} catch basins, ${r.manholes} manholes`, margin, y);
-            y += 10;
+            y += 8;
         }
-        
+
         // Add Bill of Quantities title
-        doc.setFontSize(14);
+        doc.setFontSize(12);
         doc.setFont("helvetica", "bold");
         doc.text("Bill of Quantities", margin, y);
-        y += 8;
+        y += 6;
 
-        // Configure and draw the table - ONLY use body data, header is defined separately
+        // Configure and draw the table
         doc.autoTable({
             head: [["Description", "Quantity", "Unit", "Unit Rate", "Amount"]],
             body: tableBody,
             startY: y,
             theme: "grid",
             styles: {
-                fontSize: 9,
-                cellPadding: 4,
+                fontSize: 8,
+                cellPadding: 3,
                 valign: "middle",
-                lineColor: [0, 0, 0],
-                lineWidth: 0.1,
+                halign: "left",
+                overflow: "linebreak", // Enable text wrapping
+                lineColor: [44, 62, 80],
+                lineWidth: 0.2,
                 textColor: [0, 0, 0]
             },
             columnStyles: {
-                0: { halign: "left", cellWidth: 75 },
-                1: { halign: "center", cellWidth: 25 },
-                2: { halign: "center", cellWidth: 20 },
-                3: { halign: "right", cellWidth: 30 },
-                4: { halign: "right", cellWidth: 35 }
+                0: { halign: "left", cellWidth: 70 }, // Description
+                1: { halign: "center", cellWidth: 20 }, // Quantity
+                2: { halign: "center", cellWidth: 20 }, // Unit
+                3: { halign: "right", cellWidth: 25 }, // Unit Rate
+                4: { halign: "right", cellWidth: 35 } // Amount
             },
             headStyles: {
-                fillColor: [220, 220, 220],
-                textColor: 0,
+                fillColor: [200, 200, 200],
+                textColor: [0, 0, 0],
                 fontStyle: "bold",
-                lineWidth: 0.1,
-                fontSize: 9
+                fontSize: 8,
+                lineWidth: 0.2
             },
             alternateRowStyles: {
                 fillColor: [245, 245, 245]
             },
-            didParseCell: function(data) {
+            margin: { top: margin, left: margin, right: margin, bottom: 15 },
+            didParseCell: function (data) {
                 // Get cell value safely
                 let cellValue = '';
                 if (data.cell.raw !== null && data.cell.raw !== undefined) {
                     cellValue = data.cell.raw.toString();
-                } else if (data.cell.text !== null && data.cell.text !== undefined) {
-                    cellValue = data.cell.text.toString();
                 }
-                
-                // Remove ± symbols from amounts - FIXED VERSION
-                if ((data.column.index === 3 || data.column.index === 4) && data.cell.text) {
-                    // Ensure data.cell.text is a string before calling replace
-                    if (typeof data.cell.text === 'string') {
+
+                // Clean ± symbols from numeric columns
+                if (data.column.index === 3 || data.column.index === 4) {
+                    if (data.cell.text && typeof data.cell.text === 'string') {
                         data.cell.text = data.cell.text.replace(/±/g, '');
-                    } else if (typeof data.cell.text === 'number') {
-                        data.cell.text = data.cell.text.toString();
+                    } else if (data.cell.text && typeof data.cell.text === 'number') {
+                        data.cell.text = data.cell.text.toString().replace(/±/g, '');
                     }
                 }
-                
+
                 // Style section headers
                 if (cellValue === "Materials" || cellValue === "Labor" || cellValue === "Summary") {
-                    data.cell.styles.fillColor = [224, 224, 224];
+                    data.cell.styles.fillColor = [200, 200, 200];
                     data.cell.styles.fontStyle = 'bold';
-                    data.cell.styles.halign = 'left';
                     data.cell.colSpan = 5;
+                    data.cell.styles.halign = 'left';
                 }
-                
+
                 // Style totals and subtotals
-                if (cellValue.includes("Subtotal") || cellValue.includes("Total") || cellValue.includes("TOTAL") || 
+                if (cellValue.includes("Subtotal") || cellValue.includes("Total") || 
                     cellValue.includes("Overhead") || cellValue.includes("Profit Margin") || 
                     cellValue.includes("Materials + Labor") || cellValue.includes("Waste")) {
                     data.cell.styles.fontStyle = 'bold';
                 }
-                
+
                 // Style the grand total row
                 if (cellValue.includes("TOTAL PROJECT COST")) {
-                    data.cell.styles.fillColor = [200, 200, 200];
+                    data.cell.styles.fillColor = [180, 180, 180];
                     data.cell.styles.fontStyle = 'bold';
+                    data.row.cells[4].styles.fillColor = [180, 180, 180];
                 }
             },
-            didDrawPage: function(data) {
+            didDrawPage: function (data) {
+                // Add page number
                 doc.setFontSize(8);
                 doc.setTextColor(100);
                 doc.text(`Page ${data.pageNumber}`, 
-                    doc.internal.pageSize.width - 15, 
+                    doc.internal.pageSize.width - margin, 
                     doc.internal.pageSize.height - 10);
-            },
-            margin: { top: y, left: margin, right: margin }
+            }
         });
 
         // Save the PDF
-        doc.save("Sanitary_Storm_Report.pdf");
+        doc.save(`${projectName}_Report.pdf`);
     } catch (error) {
         alert("Error generating PDF: " + error.message);
         console.error(error);
