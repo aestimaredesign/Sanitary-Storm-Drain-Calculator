@@ -442,6 +442,59 @@
       color: var(--danger);
       font-weight: 500;
     }
+    
+    .system-costs {
+      background: #f0f9ff;
+      padding: 15px;
+      border-radius: 4px;
+      margin-bottom: 15px;
+    }
+    
+    .system-costs h4 {
+      margin-top: 0;
+      color: var(--primary);
+    }
+    
+    .pipe-cost-row {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 10px;
+      align-items: center;
+    }
+    
+    .pipe-cost-row select, .pipe-cost-row input {
+      padding: 8px;
+      border-radius: 4px;
+      border: 1px solid var(--border);
+    }
+    
+    .pipe-cost-row .size-select {
+      width: 80px;
+    }
+    
+    .pipe-cost-row .cost-input {
+      width: 120px;
+    }
+    
+    .add-pipe-btn {
+      background: var(--success);
+      color: white;
+      border: none;
+      padding: 8px 12px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 0.9em;
+    }
+    
+    .remove-pipe-btn {
+      background: var(--danger);
+      color: white;
+      border: none;
+      padding: 8px 12px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 0.9em;
+    }
   </style>
 </head>
 <body>
@@ -768,214 +821,20 @@
         <div class="material-costs">
           <h3>Material Costs</h3>
           
-          <div class="material-type">
-            <h4>PVC Pipe</h4>
-            <div class="form-row">
-              <label for="pvcPipeSize">Select Size:</label>
-              <div class="input-group">
-                <select id="pvcPipeSize" onchange="showPipeSizeInputs('pvc')">
-                  <option value="2">2"</option>
-                  <option value="3">3"</option>
-                  <option value="4">4"</option>
-                  <option value="6">6"</option>
-                </select>
-              </div>
+          <div class="system-costs">
+            <h4>Sanitary System</h4>
+            <div id="sanitaryPipesContainer">
+              <!-- Dynamic sanitary pipes will be added here -->
             </div>
-            <div id="pvcPipeInputs" class="pipe-size-group active">
-              <div class="pipe-size-inputs">
-                <div class="pipe-size-input">
-                  <label for="pvcPipeCost2">2" PVC Pipe Cost:</label>
-                  <input type="number" id="pvcPipeCost2" value="25" min="0" step="0.01">
-                </div>
-                <div class="pipe-size-input">
-                  <label for="pvcPipeCost3">3" PVC Pipe Cost:</label>
-                  <input type="number" id="pvcPipeCost3" value="35" min="0" step="0.01">
-                </div>
-                <div class="pipe-size-input">
-                  <label for="pvcPipeCost4">4" PVC Pipe Cost:</label>
-                  <input type="number" id="pvcPipeCost4" value="50" min="0" step="0.01">
-                </div>
-                <div class="pipe-size-input">
-                  <label for="pvcPipeCost6">6" PVC Pipe Cost:</label>
-                  <input type="number" id="pvcPipeCost6" value="85" min="0" step="0.01">
-                </div>
-              </div>
-            </div>
+            <button class="add-pipe-btn" onclick="addSanitaryPipe()">+ Add Pipe</button>
           </div>
           
-          <div class="material-type">
-            <h4>Cast Iron Pipe</h4>
-            <div class="form-row">
-              <label for="castIronPipeSize">Select Size:</label>
-              <div class="input-group">
-                <select id="castIronPipeSize" onchange="showPipeSizeInputs('castIron')">
-                  <option value="2">2"</option>
-                  <option value="3">3"</option>
-                  <option value="4">4"</option>
-                  <option value="6">6"</option>
-                </select>
-              </div>
+          <div class="system-costs">
+            <h4>Storm Drain System</h4>
+            <div id="stormPipesContainer">
+              <!-- Dynamic storm pipes will be added here -->
             </div>
-            <div id="castIronPipeInputs" class="pipe-size-group">
-              <div class="pipe-size-inputs">
-                <div class="pipe-size-input">
-                  <label for="castIronPipeCost2">2" Cast Iron Pipe Cost:</label>
-                  <input type="number" id="castIronPipeCost2" value="65" min="0" step="0.01">
-                </div>
-                <div class="pipe-size-input">
-                  <label for="castIronPipeCost3">3" Cast Iron Pipe Cost:</label>
-                  <input type="number" id="castIronPipeCost3" value="95" min="0" step="0.01">
-                </div>
-                <div class="pipe-size-input">
-                  <label for="castIronPipeCost4">4" Cast Iron Pipe Cost:</label>
-                  <input type="number" id="castIronPipeCost4" value="130" min="0" step="0.01">
-                </div>
-                <div class="pipe-size-input">
-                  <label for="castIronPipeCost6">6" Cast Iron Pipe Cost:</label>
-                  <input type="number" id="castIronPipeCost6" value="200" min="0" step="0.01">
-                </div>
-              </div>
-            </div>
-          </div>
-          
-          <div class="material-type">
-            <h4>HDPE Pipe</h4>
-            <div class="form-row">
-              <label for="hdpPipeSize">Select Size:</label>
-              <div class="input-group">
-                <select id="hdpPipeSize" onchange="showPipeSizeInputs('hdp')">
-                  <option value="2">2"</option>
-                  <option value="3">3"</option>
-                  <option value="4">4"</option>
-                  <option value="6">6"</option>
-                </select>
-              </div>
-            </div>
-            <div id="hdpPipeInputs" class="pipe-size-group">
-              <div class="pipe-size-inputs">
-                <div class="pipe-size-input">
-                  <label for="hdpPipeCost2">2" HDPE Pipe Cost:</label>
-                  <input type="number" id="hdpPipeCost2" value="32" min="0" step="0.01">
-                </div>
-                <div class="pipe-size-input">
-                  <label for="hdpPipeCost3">3" HDPE Pipe Cost:</label>
-                  <input type="number" id="hdpPipeCost3" value="45" min="0" step="0.01">
-                </div>
-                <div class="pipe-size-input">
-                  <label for="hdpPipeCost4">4" HDPE Pipe Cost:</label>
-                  <input type="number" id="hdpPipeCost4" value="65" min="0" step="0.01">
-                </div>
-                <div class="pipe-size-input">
-                  <label for="hdpPipeCost6">6" HDPE Pipe Cost:</label>
-                  <input type="number" id="hdpPipeCost6" value="110" min="0" step="0.01">
-                </div>
-              </div>
-            </div>
-          </div>
-          
-          <div class="material-type">
-            <h4>ABS Pipe</h4>
-            <div class="form-row">
-              <label for="absPipeSize">Select Size:</label>
-              <div class="input-group">
-                <select id="absPipeSize" onchange="showPipeSizeInputs('abs')">
-                  <option value="2">2"</option>
-                  <option value="3">3"</option>
-                  <option value="4">4"</option>
-                  <option value="6">6"</option>
-                </select>
-              </div>
-            </div>
-            <div id="absPipeInputs" class="pipe-size-group">
-              <div class="pipe-size-inputs">
-                <div class="pipe-size-input">
-                  <label for="absPipeCost2">2" ABS Pipe Cost:</label>
-                  <input type="number" id="absPipeCost2" value="28" min="0" step="0.01">
-                </div>
-                <div class="pipe-size-input">
-                  <label for="absPipeCost3">3" ABS Pipe Cost:</label>
-                  <input type="number" id="absPipeCost3" value="40" min="0" step="0.01">
-                </div>
-                <div class="pipe-size-input">
-                  <label for="absPipeCost4">4" ABS Pipe Cost:</label>
-                  <input type="number" id="absPipeCost4" value="55" min="0" step="0.01">
-                </div>
-                <div class="pipe-size-input">
-                  <label for="absPipeCost6">6" ABS Pipe Cost:</label>
-                  <input type="number" id="absPipeCost6" value="90" min="0" step="0.01">
-                </div>
-              </div>
-            </div>
-          </div>
-          
-          <div class="material-type">
-            <h4>Corrugated HDPE</h4>
-            <div class="form-row">
-              <label for="corrugatedPipeSize">Select Size:</label>
-              <div class="input-group">
-                <select id="corrugatedPipeSize" onchange="showPipeSizeInputs('corrugated')">
-                  <option value="4">4"</option>
-                  <option value="6">6"</option>
-                  <option value="8">8"</option>
-                  <option value="10">10"</option>
-                </select>
-              </div>
-            </div>
-            <div id="corrugatedPipeInputs" class="pipe-size-group">
-              <div class="pipe-size-inputs">
-                <div class="pipe-size-input">
-                  <label for="corrugatedPipeCost4">4" Corrugated HDPE Cost:</label>
-                  <input type="number" id="corrugatedPipeCost4" value="15" min="0" step="0.01">
-                </div>
-                <div class="pipe-size-input">
-                  <label for="corrugatedPipeCost6">6" Corrugated HDPE Cost:</label>
-                  <input type="number" id="corrugatedPipeCost6" value="25" min="0" step="0.01">
-                </div>
-                <div class="pipe-size-input">
-                  <label for="corrugatedPipeCost8">8" Corrugated HDPE Cost:</label>
-                  <input type="number" id="corrugatedPipeCost8" value="40" min="0" step="0.01">
-                </div>
-                <div class="pipe-size-input">
-                  <label for="corrugatedPipeCost10">10" Corrugated HDPE Cost:</label>
-                  <input type="number" id="corrugatedPipeCost10" value="60" min="0" step="0.01">
-                </div>
-              </div>
-            </div>
-          </div>
-          
-          <div class="material-type">
-            <h4>Concrete Pipe</h4>
-            <div class="form-row">
-              <label for="concretePipeSize">Select Size:</label>
-              <div class="input-group">
-                <select id="concretePipeSize" onchange="showPipeSizeInputs('concrete')">
-                  <option value="4">4"</option>
-                  <option value="6">6"</option>
-                  <option value="8">8"</option>
-                  <option value="10">10"</option>
-                </select>
-              </div>
-            </div>
-            <div id="concretePipeInputs" class="pipe-size-group">
-              <div class="pipe-size-inputs">
-                <div class="pipe-size-input">
-                  <label for="concretePipeCost4">4" Concrete Pipe Cost:</label>
-                  <input type="number" id="concretePipeCost4" value="55" min="0" step="0.01">
-                </div>
-                <div class="pipe-size-input">
-                  <label for="concretePipeCost6">6" Concrete Pipe Cost:</label>
-                  <input type="number" id="concretePipeCost6" value="85" min="0" step="0.01">
-                </div>
-                <div class="pipe-size-input">
-                  <label for="concretePipeCost8">8" Concrete Pipe Cost:</label>
-                  <input type="number" id="concretePipeCost8" value="120" min="0" step="0.01">
-                </div>
-                <div class="pipe-size-input">
-                  <label for="concretePipeCost10">10" Concrete Pipe Cost:</label>
-                  <input type="number" id="concretePipeCost10" value="180" min="0" step="0.01">
-                </div>
-              </div>
-            </div>
+            <button class="add-pipe-btn" onclick="addStormPipe()">+ Add Pipe</button>
           </div>
           
           <div class="section-header">Accessories</div>
@@ -1473,20 +1332,129 @@
         });
       });
       
-      // Initialize pipe size inputs
-      showPipeSizeInputs('pvc');
+      // Initialize pipe cost inputs
+      initializePipeCosts();
     });
     
-    // Show pipe size inputs based on selected size
-    function showPipeSizeInputs(materialType) {
-      // Hide all pipe size inputs
-      document.querySelectorAll('.pipe-size-group').forEach(group => {
-        group.classList.remove('active');
-      });
+    // Initialize pipe costs based on system selections
+    function initializePipeCosts() {
+      // Add default pipes for sanitary system
+      addSanitaryPipe();
       
-      // Show selected pipe size inputs
-      const inputsGroup = document.getElementById(materialType + 'PipeInputs');
-      inputsGroup.classList.add('active');
+      // Add default pipes for storm system
+      addStormPipe();
+    }
+    
+    // Add sanitary pipe cost input
+    function addSanitaryPipe() {
+      const container = document.getElementById('sanitaryPipesContainer');
+      const pipeId = 'sanitaryPipe_' + Date.now();
+      
+      const pipeRow = document.createElement('div');
+      pipeRow.className = 'pipe-cost-row';
+      pipeRow.id = pipeId;
+      
+      // Get the selected material from sanitary system
+      const material = document.getElementById('sanPipeMaterial').value;
+      const materialName = getMaterialName(material);
+      
+      pipeRow.innerHTML = `
+        <select class="size-select" onchange="updatePipeCost('${pipeId}')">
+          <option value="2">2"</option>
+          <option value="3">3"</option>
+          <option value="4" selected>4"</option>
+          <option value="6">6"</option>
+        </select>
+        <span>${materialName} Pipe Cost:</span>
+        <input type="number" class="cost-input" value="${getDefaultPipeCost(material, '4')}" min="0" step="0.01" onchange="updatePipeCost('${pipeId}')">
+        <button class="remove-pipe-btn" onclick="removePipe('${pipeId}')">Remove</button>
+      `;
+      
+      container.appendChild(pipeRow);
+    }
+    
+    // Add storm pipe cost input
+    function addStormPipe() {
+      const container = document.getElementById('stormPipesContainer');
+      const pipeId = 'stormPipe_' + Date.now();
+      
+      const pipeRow = document.createElement('div');
+      pipeRow.className = 'pipe-cost-row';
+      pipeRow.id = pipeId;
+      
+      // Get the selected material from storm system
+      const material = document.getElementById('stormPipeMaterial').value;
+      const materialName = getMaterialName(material);
+      
+      pipeRow.innerHTML = `
+        <select class="size-select" onchange="updatePipeCost('${pipeId}')">
+          <option value="4" selected>4"</option>
+          <option value="6">6"</option>
+          <option value="8">8"</option>
+          <option value="10">10"</option>
+        </select>
+        <span>${materialName} Pipe Cost:</span>
+        <input type="number" class="cost-input" value="${getDefaultPipeCost(material, '4')}" min="0" step="0.01" onchange="updatePipeCost('${pipeId}')">
+        <button class="remove-pipe-btn" onclick="removePipe('${pipeId}')">Remove</button>
+      `;
+      
+      container.appendChild(pipeRow);
+    }
+    
+    // Remove pipe cost input
+    function removePipe(pipeId) {
+      const pipeRow = document.getElementById(pipeId);
+      if (pipeRow) {
+        pipeRow.remove();
+      }
+    }
+    
+    // Update pipe cost when size changes
+    function updatePipeCost(pipeId) {
+      const pipeRow = document.getElementById(pipeId);
+      if (!pipeRow) return;
+      
+      const sizeSelect = pipeRow.querySelector('.size-select');
+      const costInput = pipeRow.querySelector('.cost-input');
+      const size = sizeSelect.value;
+      
+      // Determine material based on pipe ID prefix
+      let material;
+      if (pipeId.startsWith('sanitaryPipe_')) {
+        material = document.getElementById('sanPipeMaterial').value;
+      } else if (pipeId.startsWith('stormPipe_')) {
+        material = document.getElementById('stormPipeMaterial').value;
+      }
+      
+      // Update cost with default value for the selected size
+      costInput.value = getDefaultPipeCost(material, size);
+    }
+    
+    // Get material display name
+    function getMaterialName(material) {
+      const materialNames = {
+        pvc: 'PVC',
+        castIron: 'Cast Iron',
+        hdp: 'HDPE',
+        abs: 'ABS',
+        corrugated: 'Corrugated HDPE',
+        concrete: 'Concrete'
+      };
+      return materialNames[material] || material.toUpperCase();
+    }
+    
+    // Default pipe costs
+    function getDefaultPipeCost(materialType, size) {
+      const baseCosts = {
+        'pvc': { '2': 25, '3': 35, '4': 50, '6': 85 },
+        'castIron': { '2': 65, '3': 95, '4': 130, '6': 200 },
+        'hdp': { '2': 32, '3': 45, '4': 65, '6': 110 },
+        'abs': { '2': 28, '3': 40, '4': 55, '6': 90 },
+        'corrugated': { '4': 15, '6': 25, '8': 40, '10': 60 },
+        'concrete': { '4': 55, '6': 85, '8': 120, '10': 180 }
+      };
+      
+      return baseCosts[materialType]?.[size] || 0;
     }
     
     // Tab switching function
@@ -1665,10 +1633,6 @@
         fittings
       };
       
-      // Sync pipe size selection in costs tab
-      document.getElementById('pvcPipeSize').value = recommendedSize;
-      showPipeSizeInputs(material);
-      
       updateSanitarySummary();
     }
     
@@ -1820,12 +1784,6 @@
       });
       
       const costInputs = [
-        'pvcPipeCost2', 'pvcPipeCost3', 'pvcPipeCost4', 'pvcPipeCost6',
-        'castIronPipeCost2', 'castIronPipeCost3', 'castIronPipeCost4', 'castIronPipeCost6',
-        'hdpPipeCost2', 'hdpPipeCost3', 'hdpPipeCost4', 'hdpPipeCost6',
-        'absPipeCost2', 'absPipeCost3', 'absPipeCost4', 'absPipeCost6',
-        'corrugatedPipeCost4', 'corrugatedPipeCost6', 'corrugatedPipeCost8', 'corrugatedPipeCost10',
-        'concretePipeCost4', 'concretePipeCost6', 'concretePipeCost8', 'concretePipeCost10',
         'trapCost', 'ventCost', 'cleanoutCost', 'manholeCost', 'fittingCost', 'downspoutCost', 'catchBasinCost',
         'plumberRate', 'helperRate', 'dailyHours', 'wasteFactor', 'overhead', 'profitMargin',
         'customPipeLaying', 'customManhole', 'customCatchBasin', 'customFitting',
@@ -1859,34 +1817,6 @@
       });
       
       return isValid;
-    }
-    
-    // Helper function to get material cost based on material type and size
-    function getMaterialCost(materialType, size) {
-      // For pipe materials, we need both material type and size
-      if (materialType.includes('Pipe')) {
-        const costElement = document.getElementById(materialType.toLowerCase() + 'PipeCost' + size);
-        return costElement ? parseFloat(costElement.value) : getDefaultPipeCost(materialType, size);
-      }
-      
-      // For other materials
-      const costElement = document.getElementById(materialType.toLowerCase() + 'Cost');
-      return costElement ? parseFloat(costElement.value) : 0;
-    }
-
-    // Default pipe costs if specific size is not found
-    function getDefaultPipeCost(materialType, size) {
-      const baseCosts = {
-        'pvcPipe': { '2': 25, '3': 35, '4': 50, '6': 85 },
-        'castIronPipe': { '2': 65, '3': 95, '4': 130, '6': 200 },
-        'hdpPipe': { '2': 32, '3': 45, '4': 65, '6': 110 },
-        'absPipe': { '2': 28, '3': 40, '4': 55, '6': 90 },
-        'corrugatedPipe': { '4': 15, '6': 25, '8': 40, '10': 60 },
-        'concretePipe': { '4': 55, '6': 85, '8': 120, '10': 180 }
-      };
-      
-      const materialKey = materialType.toLowerCase();
-      return baseCosts[materialKey]?.[size] || 0;
     }
     
     // Calculate costs with productivity-based labor
@@ -1964,31 +1894,46 @@
         const r = window.sanitaryResults;
         const material = r.pipeMaterial;
         
-        // Get material costs
-        const pipeCost = getMaterialCost(material + 'Pipe', r.pipeSize);
+        // Get material costs for pipes
+        const sanitaryPipes = document.querySelectorAll('#sanitaryPipesContainer .pipe-cost-row');
+        let totalSanitaryPipeCost = 0;
+        
+        sanitaryPipes.forEach(pipeRow => {
+          const sizeSelect = pipeRow.querySelector('.size-select');
+          const costInput = pipeRow.querySelector('.cost-input');
+          const size = sizeSelect.value;
+          const pipeCost = parseFloat(costInput.value);
+          
+          // Calculate pipe quantity based on the size
+          // For simplicity, we'll assume all pipes are used proportionally
+          // In a real application, you would need more sophisticated logic
+          const pipeQty = Math.ceil(r.pipeQty / sanitaryPipes.length);
+          const pipeMaterialCost = pipeCost * pipeQty;
+          totalSanitaryPipeCost += pipeMaterialCost;
+          
+          const pipeProductivity = productivity[material.toLowerCase() + 'Pipe'] || productivity.pvcPipe;
+          const pipeLaborDays = r.runLength / pipeProductivity / sanitaryPipes.length;
+          const pipeLaborCost = pipeLaborDays * (plumberRate * pipeCrewPlumbers + helperRate * pipeCrewHelpers) * dailyHours;
+          
+          addCostRow(`${size}" ${material.toUpperCase()} Pipe`, pipeQty, "pcs", formatCurrency(pipeCost), formatCurrency(pipeMaterialCost));
+          costResults.items.push({
+            description: `${size}" ${material.toUpperCase()} Pipe`,
+            quantity: pipeQty,
+            unit: 'pcs',
+            unitRate: pipeCost,
+            amount: pipeMaterialCost
+          });
+          totalMaterialCost += pipeMaterialCost;
+          totalLaborDays += pipeLaborDays;
+          totalLaborCost += pipeLaborCost;
+        });
+        
+        // Get accessory costs
         const fittingCost = parseFloat(document.getElementById('fittingCost').value);
         const trapCost = parseFloat(document.getElementById('trapCost').value);
         const ventCost = parseFloat(document.getElementById('ventCost').value);
         const cleanoutCost = parseFloat(document.getElementById('cleanoutCost').value);
         const manholeCost = parseFloat(document.getElementById('manholeCost').value);
-        
-        // Pipe cost
-        const pipeMaterialCost = pipeCost * r.pipeQty;
-        const pipeProductivity = productivity[material.toLowerCase() + 'Pipe'] || productivity.pvcPipe;
-        const pipeLaborDays = r.runLength / pipeProductivity;
-        const pipeLaborCost = pipeLaborDays * (plumberRate * pipeCrewPlumbers + helperRate * pipeCrewHelpers) * dailyHours;
-        
-        addCostRow(`${r.pipeSize}" ${material.toUpperCase()} Pipe`, r.pipeQty, "pcs", formatCurrency(pipeCost), formatCurrency(pipeMaterialCost));
-        costResults.items.push({
-          description: `${r.pipeSize}" ${material.toUpperCase()} Pipe`,
-          quantity: r.pipeQty,
-          unit: 'pcs',
-          unitRate: pipeCost,
-          amount: pipeMaterialCost
-        });
-        totalMaterialCost += pipeMaterialCost;
-        totalLaborDays += pipeLaborDays;
-        totalLaborCost += pipeLaborCost;
         
         // Fittings cost
         const fittingMaterialCost = fittingCost * r.fittings;
@@ -2081,30 +2026,44 @@
         const r = window.stormResults;
         const material = r.pipeMaterial;
         
-        // Get material costs
-        const pipeCost = getMaterialCost(material + 'Pipe', r.pipeSize);
+        // Get material costs for pipes
+        const stormPipes = document.querySelectorAll('#stormPipesContainer .pipe-cost-row');
+        let totalStormPipeCost = 0;
+        
+        stormPipes.forEach(pipeRow => {
+          const sizeSelect = pipeRow.querySelector('.size-select');
+          const costInput = pipeRow.querySelector('.cost-input');
+          const size = sizeSelect.value;
+          const pipeCost = parseFloat(costInput.value);
+          
+          // Calculate pipe quantity based on the size
+          // For simplicity, we'll assume all pipes are used proportionally
+          const pipeQty = Math.ceil(r.pipeQty / stormPipes.length);
+          const pipeMaterialCost = pipeCost * pipeQty;
+          totalStormPipeCost += pipeMaterialCost;
+          
+          const pipeProductivity = productivity[material.toLowerCase() + 'Pipe'] || productivity.pvcPipe;
+          const pipeLaborDays = r.runLength / pipeProductivity / stormPipes.length;
+          const pipeLaborCost = pipeLaborDays * (plumberRate * pipeCrewPlumbers + helperRate * pipeCrewHelpers) * dailyHours;
+          
+          addCostRow(`${size}" ${material.toUpperCase()} Storm Pipe`, pipeQty, "pcs", formatCurrency(pipeCost), formatCurrency(pipeMaterialCost));
+          costResults.items.push({
+            description: `${size}" ${material.toUpperCase()} Storm Pipe`,
+            quantity: pipeQty,
+            unit: 'pcs',
+            unitRate: pipeCost,
+            amount: pipeMaterialCost
+          });
+          totalMaterialCost += pipeMaterialCost;
+          totalLaborDays += pipeLaborDays;
+          totalLaborCost += pipeLaborCost;
+        });
+        
+        // Get accessory costs
         const fittingCost = parseFloat(document.getElementById('fittingCost').value);
         const downspoutCost = parseFloat(document.getElementById('downspoutCost').value);
         const catchBasinCost = parseFloat(document.getElementById('catchBasinCost').value);
         const manholeCost = parseFloat(document.getElementById('manholeCost').value);
-        
-        // Pipe cost
-        const pipeMaterialCost = pipeCost * r.pipeQty;
-        const pipeProductivity = productivity[material.toLowerCase() + 'Pipe'] || productivity.pvcPipe;
-        const pipeLaborDays = r.runLength / pipeProductivity;
-        const pipeLaborCost = pipeLaborDays * (plumberRate * pipeCrewPlumbers + helperRate * pipeCrewHelpers) * dailyHours;
-        
-        addCostRow(`${r.pipeSize}" ${material.toUpperCase()} Storm Pipe`, r.pipeQty, "pcs", formatCurrency(pipeCost), formatCurrency(pipeMaterialCost));
-        costResults.items.push({
-          description: `${r.pipeSize}" ${material.toUpperCase()} Storm Pipe`,
-          quantity: r.pipeQty,
-          unit: 'pcs',
-          unitRate: pipeCost,
-          amount: pipeMaterialCost
-        });
-        totalMaterialCost += pipeMaterialCost;
-        totalLaborDays += pipeLaborDays;
-        totalLaborCost += pipeLaborCost;
         
         // Fittings cost
         const fittingMaterialCost = fittingCost * r.fittings;
@@ -2452,7 +2411,7 @@
       ];
     }
 
-    // Export to PDF
+    // Export to PDF - FIXED VERSION
     function exportToPDF() {
         try {
             const { jsPDF } = window.jspdf;
@@ -2492,41 +2451,8 @@
             doc.text(`Date: ${date}`, 100, y);
             y += 5;
             doc.text(`Prepared by: ${preparedBy}`, margin, y);
-            y += 10;
+            y += 15;
 
-            // Add system summaries
-            if (window.sanitaryResults) {
-                const r = window.sanitaryResults;
-                doc.setFontSize(11);
-                doc.setFont("helvetica", "bold");
-                doc.text("Sanitary System Summary", margin, y);
-                y += 6;
-                doc.setFont("helvetica", "normal");
-                doc.text(`Peak Flow: ${r.flowRate.toFixed(2)} ${r.flowUnit}`, margin, y);
-                y += 5;
-                doc.text(`Pipe: ${r.pipeQty} sections of ${r.pipeSize}" ${r.pipeMaterial} (${r.runLength} ${r.lengthUnit})`, margin, y);
-                y += 5;
-                doc.text(`Accessories: ${r.traps} traps, ${r.vents} vents, ${r.cleanouts} cleanouts, ${r.manholes} manholes`, margin, y);
-                y += 10;
-            }
-            
-            if (window.stormResults) {
-                const r = window.stormResults;
-                doc.setFontSize(11);
-                doc.setFont("helvetica", "bold");
-                doc.text("Storm System Summary", margin, y);
-                y += 6;
-                doc.setFont("helvetica", "normal");
-                doc.text(`Peak Runoff: ${r.flowRate.toFixed(2)} ${r.flowUnit}`, margin, y);
-                y += 5;
-                doc.text(`Drainage Area: ${r.totalArea.toFixed(1)} ${r.areaUnit}`, margin, y);
-                y += 5;
-                doc.text(`Pipe: ${r.pipeQty} sections of ${r.pipeSize}" ${r.pipeMaterial} (${r.runLength} ${r.lengthUnit})`, margin, y);
-                y += 5;
-                doc.text(`Accessories: ${r.downspouts} downspouts, ${r.catchBasins} catch basins, ${r.manholes} manholes`, margin, y);
-                y += 10;
-            }
-            
             // Add Bill of Quantities title
             doc.setFontSize(14);
             doc.setFont("helvetica", "bold");
@@ -2540,14 +2466,15 @@
                 startY: y,
                 theme: "grid",
                 styles: {
-                    fontSize: 8,
-                    cellPadding: 3,
+                    fontSize: 9,
+                    cellPadding: 4,
                     valign: "middle",
                     lineColor: [0, 0, 0],
-                    lineWidth: 0.1
+                    lineWidth: 0.1,
+                    textColor: [0, 0, 0]
                 },
                 columnStyles: {
-                    0: { halign: "left", cellWidth: 70 },
+                    0: { halign: "left", cellWidth: 75 },
                     1: { halign: "center", cellWidth: 25 },
                     2: { halign: "center", cellWidth: 20 },
                     3: { halign: "right", cellWidth: 30 },
@@ -2557,13 +2484,24 @@
                     fillColor: [220, 220, 220],
                     textColor: 0,
                     fontStyle: "bold",
-                    lineWidth: 0.1
+                    lineWidth: 0.1,
+                    fontSize: 9
                 },
                 alternateRowStyles: {
                     fillColor: [245, 245, 245]
                 },
                 didParseCell: function(data) {
-                    const cellValue = (data.cell.raw || "").toString();
+                    const cellValue = data.cell.raw ? data.cell.raw.toString() : '';
+                    
+                    // Remove ± symbols from amounts - FIXED VERSION
+                    if ((data.column.index === 3 || data.column.index === 4) && data.cell.text) {
+                        // Ensure data.cell.text is a string before calling replace
+                        if (typeof data.cell.text === 'string') {
+                            data.cell.text = data.cell.text.replace(/±/g, '');
+                        } else if (typeof data.cell.text === 'number') {
+                            data.cell.text = data.cell.text.toString();
+                        }
+                    }
                     
                     // Style section headers
                     if (cellValue === "Materials" || cellValue === "Labor" || cellValue === "Summary") {
