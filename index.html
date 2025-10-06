@@ -1,801 +1,3 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Sanitary & Storm Drain Calculator</title>
-<!-- jsPDF for PDF export -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
-<!-- SheetJS for Excel export -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-<style>
-:root {
---primary: #2563eb;
---primary-dark: #1d4ed8;
---secondary: #64748b;
---light: #f8fafc;
---dark: #0f172a;
---success: #10b981;
---warning: #f59e0b;
---danger: #ef4444;
---border: #cbd5c1;
-}
-body {
-font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-background-color: #f1f5f9;
-color: var(--dark);
-padding: 20px;
-line-height: 1.6;
-}
-.container {
-max-width: 1200px;
-margin: 0 auto;
-}
-header {
-background: linear-gradient(135deg, var(--primary), var(--primary-dark));
-color: white;
-padding: 20px;
-border-radius: 10px;
-margin-bottom: 25px;
-box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-}
-h1 {
-font-size: 2.2em;
-margin-bottom: 10px;
-font-weight: 700;
-}
-.subtitle {
-font-size: 1.1em;
-opacity: 0.9;
-}
-.main-content {
-display: grid;
-grid-template-columns: 1fr 1fr;
-gap: 20px;
-}
-@media (max-width: 900px) {
-.main-content {
-grid-template-columns: 1fr;
-}
-}
-section {
-margin-bottom: 25px;
-padding: 20px;
-border: 1px solid var(--border);
-border-radius: 10px;
-background-color: white;
-box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-}
-section h2 {
-font-size: 1.5em;
-margin-bottom: 20px;
-color: var(--primary);
-border-bottom: 2px solid var(--border);
-padding-bottom: 10px;
-}
-.form-row {
-display: flex;
-align-items: center;
-margin-bottom: 15px;
-gap: 15px;
-}
-.form-row label {
-flex: 0 0 180px;
-font-weight: 500;
-margin: 0;
-text-align: right;
-}
-.form-row_input-group {
-flex: 1;
-display: flex;
-align-items: center;
-gap: 10px;
-}
-.form-row input, .form-row select {
-flex: 1;
-padding: 10px;
-border-radius: 5px;
-border: 1px solid var(--border);
-background-color: white;
-color: var(--dark);
-font-size: 1em;
-min-width: 0;
-}
-.form-row input:focus, .form-row select:focus {
-outline: none;
-border-color: var(--primary);
-box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
-}
-.form-row_unit {
-flex: 0 0 40px;
-font-weight: 500;
-}
-button {
-padding: 12px 20px;
-border-radius: 5px;
-border: none;
-background-color: var(--primary);
-color: white;
-font-weight: 600;
-cursor: pointer;
-transition: background-color 0.2s;
-font-size: 1em;
-}
-button:hover {
-background-color: var(--primary-dark);
-}
-button.secondary {
-background-color: var(--secondary);
-}
-button.secondary:hover {
-background-color: #475569;
-}
-.output {
-margin-top: 20px;
-padding: 15px;
-background-color: #f8fafe;
-border-radius: 8px;
-color: var(--dark);
-border-left: 4px solid var(--primary);
-display: none;
-}
-.output h3 {
-margin-top: 0;
-color: var(--primary);
-font-size: 1.3em;
-margin-bottom: 15px;
-}
-.output p {
-margin: 5px 0;
-line-height: 1.4;
-}
-.output ul {
-margin: 5px 0;
-padding-left: 20px;
-}
-.output li {
-margin: 3px 0;
-line-height: 1.3;
-}
-.tabs {
-display: flex;
-border-bottom: 1px solid var(--border);
-margin-bottom: 20px;
-flex-wrap: wrap;
-}
-.tab {
-padding: 10px 20px;
-cursor: pointer;
-border-bottom: 3px solid transparent;
-white-space: nowrap;
-}
-.tab.active {
-border-bottom: 3px solid var(--primary);
-font-weight: 600;
-color: var(--primary);
-}
-.tab-content {
-display: none;
-}
-.tab-content.active {
-display: block;
-}
-.summary-card {
-background: white;
-border-radius: 8px;
-padding: 20px;
-box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-margin-bottom: 20px;
-display: none;
-}
-.summary-card h3 {
-margin-top: 0;
-color: var(--primary);
-}
-.cost-breakdown {
-width: 100%;
-border-collapse: collapse;
-margin-top: 15px;
-}
-.cost-breakdown th, .cost-breakdown td {
-padding: 10px;
-text-align: left;
-border-bottom: 1px solid var(--border);
-}
-.cost-breakdown th {
-background-color: #f1f5f9;
-font-weight: 600;
-}
-.cost-breakdown tr:last-child td {
-border-bottom: none;
-font-weight: 600;
-background-color: #f1f5f9;
-}
-.grey-header {
-background-color: #e0e0e0 !important;
-font-weight: bold !important;
-}
-.project-info {
-background: #f9f9f9;
-padding: 15px;
-border-radius: 4px;
-margin-bottom: 20px;
-}
-.disclaimer {
-background: #fff3cd;
-border: 1px solid #ffeaa7;
-padding: 10px;
-border-radius: 4px;
-margin: 10px 0;
-font-size: 14px;
-color: #000000;
-}
-.pipe-cost-row {
-display: flex;
-gap: 10px;
-margin-bottom: 10px;
-align-items: center;
-}
-.pipe-cost-row select, .pipe-cost-row input {
-padding: 8px;
-border-radius: 4px;
-border: 1px solid var(--border);
-}
-.pipe-cost-row .size-select {
-width: 80px;
-}
-.pipe-cost-row .cost-input {
-width: 120px;
-}
-.add-pipe-btn {
-background: var(--success);
-color: white;
-border: none;
-padding: 8px 12px;
-border-radius: 4px;
-cursor: pointer;
-font-size: 0.9em;
-}
-.remove-pipe-btn {
-background: var(--danger);
-color: white;
-border: none;
-padding: 8px 12px;
-border-radius: 4px;
-cursor: pointer;
-font-size: 0.9em;
-}
-.price-input-group {
-display: flex;
-gap: 10px;
-align-items: center;
-}
-.price-input-group input {
-flex: 1;
-}
-.formula-section {
-background: #f0f9ff;
-padding: 15px;
-border-radius: 4px;
-margin: 15px 0;
-border-left: 4px solid var(--primary);
-}
-.formula {
-font-family: monospace;
-background: #f8fafc;
-padding: 10px;
-border-radius: 4px;
-margin: 10px 0;
-border-left: 3px solid var(--primary);
-}
-.help-step {
-margin-bottom: 15px;
-padding-bottom: 10px;
-border-bottom: 1px solid #eee;
-}
-.help-step h4 {
-margin: 0 0 8px 0;
-color: var(--primary);
-}
-.reference-table {
-width: 100%;
-border-collapse: collapse;
-margin: 10px 0;
-font-size: 0.9em;
-}
-.reference-table th, .reference-table td {
-padding: 8px;
-text-align: left;
-border: 1px solid #ddd;
-}
-.reference-table th {
-background-color: #f1f5f9;
-}
-</style>
-</head>
-<body>
-<div class="container">
-<header>
-<h1>Sanitary & Storm Drain Calculator</h1>
-<div class="subtitle">Professional quantity takeoff for plumbing contractors and estimators</div>
-<div class="disclaimer">
-<strong>Note:</strong> This calculator uses practical approximations based on plumbing codes. For formal design, consult the actual code provisions and a licensed engineer.
-</div>
-</header>
-<div class="tabs">
-<div class="tab active" onclick="switchTab('project')">Project Info</div>
-<div class="tab" onclick="switchTab('sanitary')">Sanitary System</div>
-<div class="tab" onclick="switchTab('storm')">Storm System</div>
-<div class="tab" onclick="switchTab('costs')">Costs & Labor</div>
-<div class="tab" onclick="switchTab('summary')">Summary & Export</div>
-<div class="tab" onclick="switchTab('help')">Help & Formulas</div>
-</div>
-
-<!-- Project Information Section -->
-<div id="project-tab" class="tab-content active">
-<div class="section">
-<h2>Project Information</h2>
-<div class="project-info">
-<div class="form-row">
-<label for="projectName">Project Name:</label>
-<div class="input-group">
-<input type="text" id="projectName" placeholder="Enter Project Name" value="Residential Plumbing Project">
-</div>
-</div>
-<div class="form-row">
-<label for="clientName">Client Name:</label>
-<div class="input-group">
-<input type="text" id="clientName" placeholder="Enter Client Name" value="John Dela Cruz">
-</div>
-</div>
-<div class="form-row">
-<label for="projectLocation">Project Location:</label>
-<div class="input-group">
-<input type="text" id="projectLocation" placeholder="Enter Location" value="Manila, Philippines">
-</div>
-</div>
-<div class="form-row">
-<label for="preparedBy">Prepared By:</label>
-<div class="input-group">
-<input type="text" id="preparedBy" placeholder="Enter Name" value="Maria Santos, Civil Engineer">
-</div>
-</div>
-<div class="form-row">
-<label for="currency">Currency:</label>
-<div class="input-group">
-<select id="currency">
-<option value="PHP">Philippine Peso (₱)</option>
-<option value="USD">US Dollar ($)</option>
-<option value="EUR">Euro (€)</option>
-<option value="JPY">Japanese Yen (¥)</option>
-</select>
-</div>
-</div>
-</div>
-<div class="form-row">
-<label for="codeStandard">Plumbing Code Standard:</label>
-<div class="input-group">
-<select id="codeStandard">
-<option value="mpcp">RNPCP (Philippines)</option>
-<option value="ipc">IPC (International)</option>
-<option value="upc">UPC (Uniform)</option>
-</select>
-</div>
-</div>
-<div class="form-row">
-<label for="units">Measurement Units:</label>
-<div class="input-group">
-<select id="units">
-<option value="metric">Metric (m, mm, L/s)</option>
-<option value="imperial">Imperial (ft, in, gpm)</option>
-</select>
-</div>
-</div>
-<div class="button-group">
-<button onclick="saveProject()">Save Project</button>
-<button class="secondary" onclick="loadProject()">Load Project</button>
-<button class="secondary" onclick="resetCalculator()" style="background-color: var(--danger);">Reset Calculator</button>
-</div>
-</div>
-</div>
-
-<!-- Sanitary Input Section -->
-<div id="sanitary-tab" class="tab-content">
-<div class="section">
-<h2>Sanitary System</h2>
-<h3>Fixture Count</h3>
-<div class="form-row">
-<label for="wc">Water Closets:</label>
-<div class="input-group">
-<input type="number" id="wc" value="2" min="0">
-</div>
-</div>
-<div class="form-row">
-<label for="lav">Lavatories:</label>
-<div class="input-group">
-<input type="number" id="lav" value="2" min="0">
-</div>
-</div>
-<div class="form-row">
-<label for="sink">Kitchen Sinks:</label>
-<div class="input-group">
-<input type="number" id="sink" value="1" min="0">
-</div>
-</div>
-<div class="form-row">
-<label for="shower">Showers:</label>
-<div class="input-group">
-<input type="number" id="shower" value="1" min="0">
-</div>
-</div>
-<div class="form-row">
-<label for="tub">Bathtubs:</label>
-<div class="input-group">
-<input type="number" id="tub" value="1" min="0">
-</div>
-</div>
-<div class="form-row">
-<label for="urinal">Urinals:</label>
-<div class="input-group">
-<input type="number" id="urinal" value="0" min="0">
-</div>
-</div>
-<div class="form-row">
-<label for="floorDrain">Floor Drains:</label>
-<div class="input-group">
-<input type="number" id="floorDrain" value="2" min="0">
-</div>
-</div>
-<h3>Pipe Systems</h3>
-<div class="form-row">
-<label for="sanLength">Total Developed Length:</label>
-<div class="input-group">
-<input type="number" id="sanLength" value="50" min="0" step="0.1">
-<span class="unit" id="sanLengthUnit">m</span>
-</div>
-</div>
-<div class="form-row">
-<label for="sanPipeMaterial">Pipe Material:</label>
-<div class="input-group">
-<select id="sanPipeMaterial">
-<option value="pvc">PVC</option>
-<option value="castiron">Cast Iron</option>
-<option value="hdp">HDPE</option>
-<option value="abs">ABS</option>
-</select>
-</div>
-</div>
-<div class="form-row">
-<label for="sanPipeLength">Commercial Pipe Length:</label>
-<div class="input-group">
-<select id="sanPipeLength">
-<option value="3">3 m</option>
-<option value="6" selected>6 m</option>
-</select>
-</div>
-</div>
-<div class="form-row">
-<label for="sanSlope">Pipe Slope (%):</label>
-<div class="input-group">
-<input type="number" id="sanSlope" value="2" min="0.5" max="10" step="0.1">
-</div>
-</div>
-<div class="button-group">
-<button onclick="calculateSanitary()">Calculate Sanitary System</button>
-</div>
-<div class="output" id="sanitaryOutput"></div>
-</div>
-</div>
-
-<!-- Storm Input Section -->
-<div id="storm-tab" class="tab-content">
-<div class="section">
-<h2>Storm Drain System</h2>
-<h3>Runoff Calculation</h3>
-<div class="form-row">
-<label for="roofArea">Roof Area:</label>
-<div class="input-group">
-<input type="number" id="roofArea" value="200" min="0" step="0.1">
-<span class="unit" id="roofAreaUnit">m²</span>
-</div>
-</div>
-<div class="form-row">
-<label for="pavementArea">Pavement Area:</label>
-<div class="input-group">
-<input type="number" id="pavementArea" value="0" min="0" step="0.1">
-<span class="unit" id="pavementAreaUnit">m²</span>
-</div>
-</div>
-<div class="form-row">
-<label for="coef">Runoff Coefficient (C):</label>
-<div class="input-group">
-<input type="number" id="coef" value="0.9" min="0.1" max="1" step="0.05">
-</div>
-</div>
-<div class="form-row">
-<label for="intensity">Rainfall Intensity:</label>
-<div class="input-group">
-<input type="number" id="intensity" value="50" min="1" step="1">
-<span class="unit" id="intensityUnit">mm/hr</span>
-</div>
-</div>
-<h3>Pipe Systems</h3>
-<div class="form-row">
-<label for="stormLength">Total Developed Length:</label>
-<div class="input-group">
-<input type="number" id="stormLength" value="60" min="0" step="0.1">
-<span class="unit" id="stormLengthUnit">m</span>
-</div>
-</div>
-<div class="form-row">
-<label for="stormPipeMaterial">Pipe Material:</label>
-<div class="input-group">
-<select id="stormPipeMaterial">
-<option value="pvc">PVC</option>
-<option value="corrugated">Corrugated HDPE</option>
-<option value="concrete">Concrete</option>
-<option value="castiron">Cast Iron</option>
-</select>
-</div>
-</div>
-<div class="form-row">
-<label for="stormPipeLength">Commercial Pipe Length:</label>
-<div class="input-group">
-<select id="stormPipeLength">
-<option value="3">3 m</option>
-<option value="6" selected>6 m</option>
-</select>
-</div>
-</div>
-<div class="form-row">
-<label for="stormSlope">Pipe Slope (%):</label>
-<div class="input-group">
-<input type="number" id="stormSlope" value="1" min="0.5" max="10" step="0.1">
-</div>
-</div>
-<div class="button-group">
-<button onclick="calculateStorm()">Calculate Storm Drain System</button>
-</div>
-<div class="output" id="stormOutput"></div>
-</div>
-</div>
-
-<!-- Costs & Labor Section -->
-<div id="costs-tab" class="tab-content">
-<div class="section">
-<h2>Costs & Labor Estimations</h2>
-<div class="material-costs">
-<h3>Material Costs</h3>
-<div class="system-costs">
-<h4>Sanitary Systems</h4>
-<div id="sanitaryPipesContainer"></div>
-<button class="add-pipe-btn" onclick="addSanitaryPipe()">+ Add Pipe</button>
-</div>
-<div class="system-costs">
-<h4>Storm Drain System</h4>
-<div id="stormPipesContainer"></div>
-<button class="add-pipe-btn" onclick="addStormPipe()">+ Add Pipe</button>
-</div>
-<div class="section-header">Accessories</div>
-<div class="form-row">
-<label for="trapCost">Trap Cost (each):</label>
-<div class="price-input-group">
-<input type="number" id="trapCost" value="150" min="0" step="0.01" placeholder="Enter cost">
-</div>
-</div>
-<div class="form-row">
-<label for="ventCost">Vent Cost (each):</label>
-<div class="price-input-group">
-<input type="number" id="ventCost" value="100" min="0" step="0.01" placeholder="Enter cost">
-</div>
-</div>
-<div class="form-row">
-<label for="cleanoutCost">Cleanout Cost (each):</label>
-<div class="price-input-group">
-<input type="number" id="cleanoutCost" value="200" min="0" step="0.01" placeholder="Enter cost">
-</div>
-</div>
-<div class="form-row">
-<label for="manholeCost">Manhole Cost (each):</label>
-<div class="price-input-group">
-<input type="number" id="manholeCost" value="5000" min="0" step="0.01" placeholder="Enter cost">
-</div>
-</div>
-<div class="form-row">
-<label for="fittingCost">Fitting/Elbow Cost (each):</label>
-<div class="price-input-group">
-<input type="number" id="fittingCost" value="80" min="0" step="0.01" placeholder="Enter cost">
-</div>
-</div>
-<div class="form-row">
-<label for="downspoutCost">Downspout Cost (each):</label>
-<div class="price-input-group">
-<input type="number" id="downspoutCost" value="300" min="0" step="0.01" placeholder="Enter cost">
-</div>
-</div>
-<div class="form-row">
-<label for="catchBasinCost">Catch Basin Cost (each):</label>
-<div class="price-input-group">
-<input type="number" id="catchBasinCost" value="2500" min="0" step="0.01" placeholder="Enter cost">
-</div>
-</div>
-</div>
-<div class="labor-inputs">
-<h3>Labor Requirements</h3>
-<div class="form-row">
-<label for="plumberRate">Plumber Rate (per hour):</label>
-<div class="input-group">
-<input type="number" id="plumberRate" value="80" min="0" step="0.1">
-</div>
-</div>
-<div class="form-row">
-<label for="helperRate">Helper Rate (per hour):</label>
-<div class="input-group">
-<input type="number" id="helperRate" value="50" min="0" step="0.1">
-</div>
-</div>
-<div class="form-row">
-<label for="dailyHours">Daily Work Hours:</label>
-<div class="input-group">
-<input type="number" id="dailyHours" value="8" min="1" max="12">
-</div>
-</div>
-<div class="form-row">
-<label for="wasteFactor">Waste Factor (%):</label>
-<div class="input-group">
-<input type="number" id="wasteFactor" value="5" min="0" max="50">
-</div>
-</div>
-<div class="form-row">
-<label for="overhead">Overhead (%):</label>
-<div class="input-group">
-<input type="number" id="overhead" value="15" min="0" max="50">
-</div>
-</div>
-<div class="form-row">
-<label for="profitMargin">Profit Margin (%):</label>
-<div class="input-group">
-<input type="number" id="profitMargin" value="10" min="0" max="50">
-</div>
-</div>
-</div>
-<div class="button-group">
-<button onclick="calculateCosts()">Calculate Total Costs</button>
-</div>
-<div class="output" id="costsOutput"></div>
-</div>
-</div>
-
-<!-- Summary & Export Section -->
-<div id="summary-tab" class="tab-content">
-<div class="section">
-<h2>Summary & Export</h2>
-<div class="button-group">
-<button onclick="generateSummary()">Generate Summary</button>
-<button class="secondary" onclick="exportToPDF()">Export to PDF</button>
-<button class="secondary" onclick="exportToExcel()">Export to Excel</button>
-</div>
-<div class="summary-card" id="projectSummaryCard">
-<h3>Project Summary</h3>
-<div id="projectSummary"></div>
-</div>
-<div class="summary-card" id="sanitarySummaryCard">
-<h3>Sanitary System Summary</h3>
-<div id="sanitarySummary"></div>
-</div>
-<div class="summary-card" id="stormSummaryCard">
-<h3>Storm Drain System Summary</h3>
-<div id="stormSummary"></div>
-</div>
-<div class="summary-card" id="costBreakdownCard">
-<h3>Cost Breakdown</h3>
-<table class="cost-breakdown" id="costBreakdown">
-<thead>
-<tr>
-<th>Item</th>
-<th>Quantity</th>
-<th>Unit Cost</th>
-<th>Total Cost</th>
-</tr>
-</thead>
-<tbody></tbody>
-</table>
-</div>
-<div class="summary-card" id="laborSummaryCard">
-<h3>Labor Requirements</h3>
-<div id="laborSummary"></div>
-</div>
-</div>
-</div>
-
-<!-- Help & Formulas Section -->
-<div id="help-tab" class="tab-content">
-<div class="section">
-<h2>Help & Formulas</h2>
-<div class="help-step">
-<h4>How to Use This Calculator</h4>
-<ol>
-<li>Start with the Project Info tab to set up your project details</li>
-<li>Go to the Sanitary System tab to input fixture counts and pipe details</li>
-<li>Proceed to the Storm Drain System tab for runoff calculations</li>
-<li>Use the Costs & Labor tab to input material costs and labor rates</li>
-<li>View the Summary & Export tab for comprehensive results and export options</li>
-</ol>
-</div>
-<div class="formula-section">
-<h4>Sanitary System Formulas</h4>
-<div class="formula">Total Fixture Units = Σ(Fixture Count × Fixture Unit Value)</div>
-<div class="formula">Drainage Load (L/s) = Total Fixture Units × Conversion Factor</div>
-<div class="formula">Pipe Size = f(Total Fixture Units, Slope, Material)</div>
-<p>Based on the selected plumbing code standard (RNPCP, IPC, or UPC)</p>
-</div>
-<div class="formula-section">
-<h4>Storm Drain System Formulas</h4>
-<div class="formula">Q = C × I × A / 360 (for metric units)</div>
-<div class="formula">Q = C × I × A (for imperial units)</div>
-<p>Where:<br>Q = Runoff (L/s or gpm)<br>C = Runoff Coefficient<br>I = Rainfall Intensity (mm/hr or in/hr)<br>A = Area (m² or acres)</p>
-</div>
-<div class="formula-section">
-<h4>Cost Calculation Formulas</h4>
-<div class="formula">Total Material Cost = Σ(Quantity × Unit Cost)</div>
-<div class="formula">Labor Hours = Σ(Quantity / Productivity Rate)</div>
-<div class="formula">Labor Cost = Σ(Labor Hours × Hourly Rate)</div>
-<div class="formula">Total Cost = (Material Cost + Labor Cost) × (1 + Waste Factor) × (1 + Overhead) × (1 + Profit Margin)</div>
-</div>
-<h4>Reference Tables</h4>
-<h5>Fixture Unit Values (RNPCP)</h5>
-<table class="reference-table">
-<tr><th>Fixture</th><th>Fixture Units</th></tr>
-<tr><td>Water Closet</td><td>6</td></tr>
-<tr><td>Lavatory</td><td>1</td></tr>
-<tr><td>Kitchen Sink</td><td>2</td></tr>
-<tr><td>Shower</td><td>2</td></tr>
-<tr><td>Bathtub</td><td>2</td></tr>
-<tr><td>Urinal</td><td>4</td></tr>
-<tr><td>Floor Drain</td><td>2</td></tr>
-</table>
-<h5>Runoff Coefficients</h5>
-<table class="reference-table">
-<tr><th>Surface Type</th><th>Coefficient (C)</th></tr>
-<tr><td>Roofs</td><td>0.75-0.95</td></tr>
-<tr><td>Asphalt/Concrete</td><td>0.70-0.95</td></tr>
-<tr><td>Gravel</td><td>0.25-0.60</td></tr>
-<tr><td>Lawns (flat)</td><td>0.13-0.17</td></tr>
-<tr><td>Lawns (steep)</td><td>0.25-0.35</td></tr>
-</table>
-<h5>Pipe Sizing Reference</h5>
-<table class="reference-table">
-<tr><th>Pipe Size (mm)</th><th>Max Fixture Units (2% slope)</th><th>Max Flow (L/s)</th></tr>
-<tr><td>50</td><td>21</td><td>1.2</td></tr>
-<tr><td>75</td><td>40</td><td>2.5</td></tr>
-<tr><td>100</td><td>180</td><td>5.3</td></tr>
-<tr><td>150</td><td>800</td><td>15.0</td></tr>
-<tr><td>200</td><td>2400</td><td>28.0</td></tr>
-</table>
-</div>
-</div>
-</div>
-
-<script>
-// Global variables to store calculation results
-let sanitaryResults = null;
-let stormResults = null;
-let costResults = null;
-let laborResults = null;
-
-// Initialize the calculator
-document.addEventListener('DOMContentLoaded', function() {
-addSanitaryPipe();
-addStormPipe();
-});
-
-// Function to switch between tabs
-function switchTab(tabName) {
-const tabContents = document.getElementsByClassName('tab-content');
-for (let i = 0; i < tabContents.length; i++) {
-tabContents[i].classList.remove('active');
-}
 const tabs = document.getElementsByClassName('tab');
 for (let i = 0; i < tabs.length; i++) {
 tabs[i].classList.remove('active');
@@ -804,7 +6,6 @@ document.getElementById(tabName + '-tab').classList.add('active');
 event.currentTarget.classList.add('active');
 }
 
-// Function to add sanitary pipe cost input
 function addSanitaryPipe() {
 const container = document.getElementById('sanitaryPipesContainer');
 const pipeDiv = document.createElement('div');
@@ -823,7 +24,6 @@ pipeDiv.innerHTML = `
 container.appendChild(pipeDiv);
 }
 
-// Function to add storm pipe cost input
 function addStormPipe() {
 const container = document.getElementById('stormPipesContainer');
 const pipeDiv = document.createElement('div');
@@ -842,7 +42,6 @@ pipeDiv.innerHTML = `
 container.appendChild(pipeDiv);
 }
 
-// Function to format numbers for display
 function formatNumber(num, decimalPlaces = 2) {
 if (typeof num !== 'number' || isNaN(num)) return '';
 const factor = Math.pow(10, decimalPlaces);
@@ -852,21 +51,19 @@ str = str.replace(/[\+\u00B1]/g, '');
 return str;
 }
 
-// Function to format currency for display
 function formatCurrency(num) {
 if (typeof num !== 'number' || isNaN(num)) return '';
 const currency = document.getElementById('currency').value;
 let symbol = '';
 switch (currency) {
 case 'PHP': symbol = '₱'; break;
-case 'USD': symbol = '; break;
+case 'USD': symbol = '$'; break;
 case 'EUR': symbol = '€'; break;
 case 'JPY': symbol = '¥'; break;
 }
 return symbol + formatNumber(num, 2);
 }
 
-// Function to format currency for PDF (plain text)
 function formatCurrencyForPDF(num) {
 if (typeof num !== 'number' || isNaN(num)) return '';
 const currency = document.getElementById('currency').value;
@@ -880,7 +77,6 @@ case 'JPY': symbol = 'JPY '; break;
 return symbol + formatNumber(num, 2);
 }
 
-// Function to calculate sanitary system
 function calculateSanitary() {
 const wc = parseInt(document.getElementById('wc').value) || 0;
 const lav = parseInt(document.getElementById('lav').value) || 0;
@@ -890,29 +86,22 @@ const tub = parseInt(document.getElementById('tub').value) || 0;
 const urinal = parseInt(document.getElementById('urinal').value) || 0;
 const floorDrain = parseInt(document.getElementById('floorDrain').value) || 0;
 const sanLength = parseFloat(document.getElementById('sanLength').value) || 0;
-const sanPipeMaterial = document.getElementById('sanPipeMaterial').value;
 const sanPipeLength = parseFloat(document.getElementById('sanPipeLength').value) || 6;
-const sanSlope = parseFloat(document.getElementById('sanSlope').value) || 2;
 
 const fixtureUnits = { wc: 6, lav: 1, sink: 2, shower: 2, tub: 2, urinal: 4, floorDrain: 2 };
 
 let totalFixtureUnits = (wc * fixtureUnits.wc) + (lav * fixtureUnits.lav) + (sink * fixtureUnits.sink) + 
-(shower * fixtureUnits.shower) + (tub * fixtureUnits.tub) + (urinal * fixtureUnits.urinal) + (floorDrain * fixtureUnits.floorDrain);
+(shower * fixtureUnits.shower) + (tub * fixtureUnits.tub) + (urinal * fixtureUnits.urinal) + 
+(floorDrain * fixtureUnits.floorDrain);
 
 const drainageLoad = totalFixtureUnits * 0.8;
 
 let pipeSize;
-if (totalFixtureUnits <= 21) {
-pipeSize = 50;
-} else if (totalFixtureUnits <= 40) {
-pipeSize = 75;
-} else if (totalFixtureUnits <= 180) {
-pipeSize = 100;
-} else if (totalFixtureUnits <= 800) {
-pipeSize = 150;
-} else {
-pipeSize = 200;
-}
+if (totalFixtureUnits <= 21) pipeSize = 50;
+else if (totalFixtureUnits <= 40) pipeSize = 75;
+else if (totalFixtureUnits <= 180) pipeSize = 100;
+else if (totalFixtureUnits <= 800) pipeSize = 150;
+else pipeSize = 200;
 
 const pipeQuantity = Math.ceil(sanLength / sanPipeLength);
 const traps = wc + lav + sink + shower + tub + urinal + floorDrain;
@@ -922,16 +111,8 @@ const sanManholes = Math.ceil(sanLength / 50);
 const sanFittings = Math.ceil(sanLength / 10);
 
 sanitaryResults = {
-totalFixtureUnits: totalFixtureUnits,
-drainageLoad: drainageLoad,
-pipeSize: pipeSize,
-pipeQuantity: pipeQuantity,
-pipeLength: sanLength,
-traps: traps,
-vents: vents,
-cleanouts: cleanouts,
-manholes: sanManholes,
-fittings: sanFittings
+totalFixtureUnits, drainageLoad, pipeSize, pipeQuantity, pipeLength: sanLength,
+traps, vents, cleanouts, manholes: sanManholes, fittings: sanFittings
 };
 
 const output = document.getElementById('sanitaryOutput');
@@ -951,35 +132,25 @@ output.innerHTML = `
 </ul>
 `;
 output.style.display = 'block';
-return sanitaryResults;
 }
 
-// Function to calculate storm drain system
 function calculateStorm() {
 const roofArea = parseFloat(document.getElementById('roofArea').value) || 0;
 const pavementArea = parseFloat(document.getElementById('pavementArea').value) || 0;
 const coef = parseFloat(document.getElementById('coef').value) || 0.9;
 const intensity = parseFloat(document.getElementById('intensity').value) || 50;
 const stormLength = parseFloat(document.getElementById('stormLength').value) || 0;
-const stormPipeMaterial = document.getElementById('stormPipeMaterial').value;
 const stormPipeLength = parseFloat(document.getElementById('stormPipeLength').value) || 6;
-const stormSlope = parseFloat(document.getElementById('stormSlope').value) || 1;
 
 const totalArea = roofArea + pavementArea;
 const runoff = coef * intensity * totalArea / 360;
 
 let pipeSize;
-if (runoff <= 1.2) {
-pipeSize = 75;
-} else if (runoff <= 2.5) {
-pipeSize = 100;
-} else if (runoff <= 5.3) {
-pipeSize = 150;
-} else if (runoff <= 15.0) {
-pipeSize = 200;
-} else {
-pipeSize = 250;
-}
+if (runoff <= 1.2) pipeSize = 75;
+else if (runoff <= 2.5) pipeSize = 100;
+else if (runoff <= 5.3) pipeSize = 150;
+else if (runoff <= 15.0) pipeSize = 200;
+else pipeSize = 250;
 
 const pipeQuantity = Math.ceil(stormLength / stormPipeLength);
 const downspouts = Math.ceil(roofArea / 100);
@@ -988,15 +159,8 @@ const stormManholes = Math.ceil(stormLength / 50);
 const stormFittings = Math.ceil(stormLength / 10);
 
 stormResults = {
-totalArea: totalArea,
-runoff: runoff,
-pipeSize: pipeSize,
-pipeQuantity: pipeQuantity,
-pipeLength: stormLength,
-downspouts: downspouts,
-catchBasins: catchBasins,
-manholes: stormManholes,
-fittings: stormFittings
+totalArea, runoff, pipeSize, pipeQuantity, pipeLength: stormLength,
+downspouts, catchBasins, manholes: stormManholes, fittings: stormFittings
 };
 
 const output = document.getElementById('stormOutput');
@@ -1017,17 +181,11 @@ output.innerHTML = `
 </ul>
 `;
 output.style.display = 'block';
-return stormResults;
 }
 
-// Function to calculate costs
 function calculateCosts() {
-if (!sanitaryResults) {
-alert('Please calculate Sanitary System first.');
-return;
-}
-if (!stormResults) {
-alert('Please calculate Storm Drain System first.');
+if (!sanitaryResults || !stormResults) {
+alert('Please calculate Sanitary and Storm Systems first.');
 return;
 }
 
@@ -1082,13 +240,9 @@ const totalPipeLength = sanitaryResults.pipeLength + stormResults.pipeLength;
 const totalManholes = sanitaryResults.manholes + stormResults.manholes;
 const totalFittings = sanitaryResults.fittings + stormResults.fittings;
 
-const pipeLayingRate = 10;
-const manholeRate = 0.8;
-const fittingRate = 20;
-
-const pipeLayingDays = totalPipeLength / pipeLayingRate;
-const manholeDays = totalManholes / manholeRate;
-const fittingDays = totalFittings / fittingRate;
+const pipeLayingDays = totalPipeLength / 10;
+const manholeDays = totalManholes / 0.8;
+const fittingDays = totalFittings / 20;
 const totalLaborDays = pipeLayingDays + manholeDays + fittingDays;
 const totalLaborHours = totalLaborDays * dailyHours;
 
@@ -1103,13 +257,8 @@ const costWithOverhead = (costWithWaste + totalLaborCost) * (1 + overhead/100);
 const totalCost = costWithOverhead * (1 + profitMargin/100);
 
 costResults = {
-sanitaryMaterialCost: sanitaryMaterialCost,
-stormMaterialCost: stormMaterialCost,
-totalMaterialCost: totalMaterialCost,
-totalLaborCost: totalLaborCost,
-totalCost: totalCost,
-sanitaryPipeCost: sanitaryPipeCost,
-stormPipeCost: stormPipeCost,
+sanitaryMaterialCost, stormMaterialCost, totalMaterialCost, totalLaborCost, totalCost,
+sanitaryPipeCost, stormPipeCost,
 sanitaryTrapsCost: sanitaryResults.traps * trapCost,
 sanitaryVentsCost: sanitaryResults.vents * ventCost,
 sanitaryCleanoutsCost: sanitaryResults.cleanouts * cleanoutCost,
@@ -1122,13 +271,8 @@ stormFittingsCost: stormResults.fittings * fittingCost
 };
 
 laborResults = {
-totalLaborHours: totalLaborHours,
-plumberHours: plumberHours,
-helperHours: helperHours,
-totalManDays: totalLaborDays,
-plumberCost: plumberCost,
-helperCost: helperCost,
-totalLaborCost: totalLaborCost
+totalLaborHours, plumberHours, helperHours, totalManDays: totalLaborDays,
+plumberCost, helperCost, totalLaborCost
 };
 
 const output = document.getElementById('costsOutput');
@@ -1146,21 +290,11 @@ output.innerHTML = `
 </ul>
 `;
 output.style.display = 'block';
-return { costResults, laborResults };
 }
 
-// Function to generate summary
 function generateSummary() {
-if (!sanitaryResults) {
-alert('Please calculate Sanitary System first.');
-return;
-}
-if (!stormResults) {
-alert('Please calculate Storm Drain System first.');
-return;
-}
-if (!costResults) {
-alert('Please calculate Costs & Labor first.');
+if (!sanitaryResults || !stormResults || !costResults) {
+alert('Please complete all calculations first.');
 return;
 }
 
@@ -1170,8 +304,7 @@ document.getElementById('stormSummaryCard').style.display = 'block';
 document.getElementById('costBreakdownCard').style.display = 'block';
 document.getElementById('laborSummaryCard').style.display = 'block';
 
-const projectSummary = document.getElementById('projectSummary');
-projectSummary.innerHTML = `
+document.getElementById('projectSummary').innerHTML = `
 <p><strong>Project Name:</strong> ${document.getElementById('projectName').value}</p>
 <p><strong>Client:</strong> ${document.getElementById('clientName').value}</p>
 <p><strong>Location:</strong> ${document.getElementById('projectLocation').value}</p>
@@ -1179,8 +312,7 @@ projectSummary.innerHTML = `
 <p><strong>Currency:</strong> ${document.getElementById('currency').value}</p>
 `;
 
-const sanitarySummary = document.getElementById('sanitarySummary');
-sanitarySummary.innerHTML = `
+document.getElementById('sanitarySummary').innerHTML = `
 <p><strong>Total Fixture Units:</strong> ${formatNumber(sanitaryResults.totalFixtureUnits, 0)}</p>
 <p><strong>Drainage Load:</strong> ${formatNumber(sanitaryResults.drainageLoad, 2)} L/s</p>
 <p><strong>Pipe Size:</strong> ${sanitaryResults.pipeSize} mm</p>
@@ -1188,8 +320,7 @@ sanitarySummary.innerHTML = `
 <p><strong>Pipe Length:</strong> ${formatNumber(sanitaryResults.pipeLength, 1)} m</p>
 `;
 
-const stormSummary = document.getElementById('stormSummary');
-stormSummary.innerHTML = `
+document.getElementById('stormSummary').innerHTML = `
 <p><strong>Total Area:</strong> ${formatNumber(stormResults.totalArea, 2)} m²</p>
 <p><strong>Runoff:</strong> ${formatNumber(stormResults.runoff, 2)} L/s</p>
 <p><strong>Pipe Size:</strong> ${stormResults.pipeSize} mm</p>
@@ -1203,41 +334,44 @@ costBreakdown.innerHTML = '';
 addCostRow(costBreakdown, 'Sanitary Pipes', sanitaryResults.pipeQuantity, 'pcs', 
 costResults.sanitaryPipeCost / sanitaryResults.pipeQuantity, costResults.sanitaryPipeCost);
 addCostRow(costBreakdown, 'Sanitary Traps', sanitaryResults.traps, 'pcs', 
-document.getElementById('trapCost').value, costResults.sanitaryTrapsCost);
+parseFloat(document.getElementById('trapCost').value), costResults.sanitaryTrapsCost);
 addCostRow(costBreakdown, 'Sanitary Vents', sanitaryResults.vents, 'pcs', 
-document.getElementById('ventCost').value, costResults.sanitaryVentsCost);
+parseFloat(document.getElementById('ventCost').value), costResults.sanitaryVentsCost);
 addCostRow(costBreakdown, 'Sanitary Cleanouts', sanitaryResults.cleanouts, 'pcs', 
-document.getElementById('cleanoutCost').value, costResults.sanitaryCleanoutsCost);
+parseFloat(document.getElementById('cleanoutCost').value), costResults.sanitaryCleanoutsCost);
 addCostRow(costBreakdown, 'Sanitary Manholes', sanitaryResults.manholes, 'pcs', 
-document.getElementById('manholeCost').value, costResults.sanitaryManholesCost);
+parseFloat(document.getElementById('manholeCost').value), costResults.sanitaryManholesCost);
 addCostRow(costBreakdown, 'Sanitary Fittings', sanitaryResults.fittings, 'pcs', 
-document.getElementById('fittingCost').value, costResults.sanitaryFittingsCost);
+parseFloat(document.getElementById('fittingCost').value), costResults.sanitaryFittingsCost);
 
 addCostRow(costBreakdown, 'Storm Pipes', stormResults.pipeQuantity, 'pcs', 
 costResults.stormPipeCost / stormResults.pipeQuantity, costResults.stormPipeCost);
 addCostRow(costBreakdown, 'Downspouts', stormResults.downspouts, 'pcs', 
-document.getElementById('downspoutCost').value, costResults.stormDownspoutsCost);
+parseFloat(document.getElementById('downspoutCost').value), costResults.stormDownspoutsCost);
 addCostRow(costBreakdown, 'Catch Basins', stormResults.catchBasins, 'pcs', 
-document.getElementById('catchBasinCost').value, costResults.stormCatchBasinsCost);
+parseFloat(document.getElementById('catchBasinCost').value), costResults.stormCatchBasinsCost);
 addCostRow(costBreakdown, 'Storm Manholes', stormResults.manholes, 'pcs', 
-document.getElementById('manholeCost').value, costResults.stormManholesCost);
+parseFloat(document.getElementById('manholeCost').value), costResults.stormManholesCost);
 addCostRow(costBreakdown, 'Storm Fittings', stormResults.fittings, 'pcs', 
-document.getElementById('fittingCost').value, costResults.stormFittingsCost);
+parseFloat(document.getElementById('fittingCost').value), costResults.stormFittingsCost);
 
 addCostRow(costBreakdown, 'Subtotal - Materials', '', '', '', costResults.totalMaterialCost);
 addCostRow(costBreakdown, 'Labor Cost', '', '', '', costResults.totalLaborCost);
-addCostRow(costBreakdown, 'Waste Factor', '', '', `${document.getElementById('wasteFactor').value}%`,
-costResults.totalMaterialCost * (parseFloat(document.getElementById('wasteFactor').value)/100));
-addCostRow(costBreakdown, 'Overhead', '', '', `${document.getElementById('overhead').value}%`,
-(costResults.totalMaterialCost * (1 + parseFloat(document.getElementById('wasteFactor').value)/100) + 
-costResults.totalLaborCost) * (parseFloat(document.getElementById('overhead').value)/100));
-addCostRow(costBreakdown, 'Profit Margin', '', '', `${document.getElementById('profitMargin').value}%`,
-costResults.totalCost - ((costResults.totalMaterialCost * (1 + parseFloat(document.getElementById('wasteFactor').value)/100) + 
-costResults.totalLaborCost) * (1 + parseFloat(document.getElementById('overhead').value)/100)));
+
+const wasteFactor = parseFloat(document.getElementById('wasteFactor').value);
+const overhead = parseFloat(document.getElementById('overhead').value);
+const profitMargin = parseFloat(document.getElementById('profitMargin').value);
+
+addCostRow(costBreakdown, `Waste Factor (${wasteFactor}%)`, '', '', '',
+costResults.totalMaterialCost * (wasteFactor/100));
+addCostRow(costBreakdown, `Overhead (${overhead}%)`, '', '', '',
+(costResults.totalMaterialCost * (1 + wasteFactor/100) + costResults.totalLaborCost) * (overhead/100));
+addCostRow(costBreakdown, `Profit Margin (${profitMargin}%)`, '', '', '',
+costResults.totalCost - ((costResults.totalMaterialCost * (1 + wasteFactor/100) + 
+costResults.totalLaborCost) * (1 + overhead/100)));
 addCostRow(costBreakdown, 'TOTAL PROJECT COST', '', '', '', costResults.totalCost, true);
 
-const laborSummary = document.getElementById('laborSummary');
-laborSummary.innerHTML = `
+document.getElementById('laborSummary').innerHTML = `
 <p><strong>Total Labor Hours:</strong> ${formatNumber(laborResults.totalLaborHours, 1)} hours</p>
 <p><strong>Plumber Hours:</strong> ${formatNumber(laborResults.plumberHours, 1)} hours</p>
 <p><strong>Helper Hours:</strong> ${formatNumber(laborResults.helperHours, 1)} hours</p>
@@ -1246,21 +380,15 @@ laborSummary.innerHTML = `
 `;
 }
 
-// Helper function to add cost rows
 function addCostRow(table, item, quantity, unit, unitCost, totalCost, isTotal = false) {
 const row = table.insertRow();
 if (isTotal) row.className = 'grey-header';
-const cell1 = row.insertCell(0);
-const cell2 = row.insertCell(1);
-const cell3 = row.insertCell(2);
-const cell4 = row.insertCell(3);
-cell1.textContent = item;
-cell2.textContent = quantity ? `${formatNumber(quantity, 0)} ${unit}` : '';
-cell3.textContent = unitCost ? formatCurrency(unitCost) : '';
-cell4.textContent = formatCurrency(totalCost);
+row.insertCell(0).textContent = item;
+row.insertCell(1).textContent = quantity ? `${formatNumber(quantity, 0)} ${unit}` : '';
+row.insertCell(2).textContent = unitCost ? formatCurrency(unitCost) : '';
+row.insertCell(3).textContent = formatCurrency(totalCost);
 }
 
-// Extract BOQ data from stored results - FIXED for PDF
 function extractBOQDataFromDisplay() {
 if (!costResults) return getFallbackData();
 const r = costResults;
@@ -1330,17 +458,10 @@ formatCurrencyForPDF(laborResults.helperCost)],
 ];
 }
 
-// Fallback data for PDF export
 function getFallbackData() {
-return [
-["Description", "Quantity", "Unit", "Unit Rate", "Amount"],
-["Materials", "", "", "", ""],
-["Sanitary Pipes", "9", "pcs", "PHP 1,500.00", "PHP 13,500.00"],
-["TOTAL PROJECT COST", "", "", "", "PHP 62,115.30"]
-];
+return [["Description", "Quantity", "Unit", "Unit Rate", "Amount"]];
 }
 
-// Fixed PDF Export Function
 function exportToPDF() {
 try {
 const { jsPDF } = window.jspdf;
@@ -1406,7 +527,7 @@ cellWidth: 'wrap'
 columnStyles: {
 0: { halign: "left", cellWidth: 65 },
 1: { halign: "center", cellWidth: 22 },
-2: { halign: "center", cellWidth: 18 },
+  2: { halign: "center", cellWidth: 18 },
 3: { halign: "right", cellWidth: 38 },
 4: { halign: "right", cellWidth: 38 }
 },
@@ -1482,10 +603,9 @@ console.error(error);
 }
 }
 
-// Function to export to Excel
 function exportToExcel() {
 if (!sanitaryResults || !stormResults || !costResults) {
-alert('Please run Sanitary, Storm, and Cost Calculations before exporting.');
+alert('Please run all calculations before exporting.');
 return;
 }
 
@@ -1541,14 +661,6 @@ const projectData = [
 ['Storm Fittings', stormResults.fittings, '', costResults.stormFittingsCost],
 ['Subtotal - Materials', '', '', costResults.totalMaterialCost],
 ['Labor Cost', '', '', costResults.totalLaborCost],
-['Waste Factor', '', document.getElementById('wasteFactor').value + '%',
-costResults.totalMaterialCost * (parseFloat(document.getElementById('wasteFactor').value)/100)],
-['Overhead', '', document.getElementById('overhead').value + '%',
-(costResults.totalMaterialCost * (1 + parseFloat(document.getElementById('wasteFactor').value)/100) + 
-costResults.totalLaborCost) * (parseFloat(document.getElementById('overhead').value)/100)],
-['Profit Margin', '', document.getElementById('profitMargin').value + '%',
-costResults.totalCost - ((costResults.totalMaterialCost * (1 + parseFloat(document.getElementById('wasteFactor').value)/100) + 
-costResults.totalLaborCost) * (1 + parseFloat(document.getElementById('overhead').value)/100))],
 ['TOTAL COST', '', '', costResults.totalCost],
 [],
 ['Labor Requirements'],
@@ -1566,7 +678,6 @@ const projectName = document.getElementById('projectName').value;
 XLSX.writeFile(wb, `Sanitary_Storm_Report_${projectName.replace(/\s/g, '_')}.xlsx`);
 }
 
-// Function to save project
 function saveProject() {
 const projectData = {
 projectName: document.getElementById('projectName').value,
@@ -1581,7 +692,6 @@ localStorage.setItem('sanitaryStormProject', JSON.stringify(projectData));
 alert('Project saved successfully!');
 }
 
-// Function to load project
 function loadProject() {
 const savedProject = localStorage.getItem('sanitaryStormProject');
 if (savedProject) {
@@ -1599,7 +709,6 @@ alert('No saved project found.');
 }
 }
 
-// Function to reset calculator
 function resetCalculator() {
 if (confirm('Are you sure you want to reset all inputs? This action cannot be undone.')) {
 document.getElementById('projectName').value = 'Residential Plumbing Project';
